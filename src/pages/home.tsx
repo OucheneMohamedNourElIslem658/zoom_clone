@@ -16,7 +16,6 @@ import {
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Plus, Video, CalendarDays, Clock } from "lucide-react"
 import CreateMeetingDialog from "@/components/custom/create_meeting_dialog"
 
@@ -108,7 +107,6 @@ function formatTime(date: Date) {
 }
 
 export default function HomePage() {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("upcoming")
 
