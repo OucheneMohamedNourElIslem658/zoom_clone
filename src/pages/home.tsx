@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Plus, Video, CalendarDays, Clock } from "lucide-react"
+import CreateMeetingDialog from "@/components/custom/create_meeting_dialog"
 
 // Mock data for meetings
 const meetings = [
@@ -137,110 +138,13 @@ export default function HomePage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="whitespace-nowrap">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Meeting
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[525px]">
-                <DialogHeader>
-                  <DialogTitle>Create New Meeting</DialogTitle>
-                  <DialogDescription>Fill in the details below to schedule a new meeting.</DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="title">Meeting Title</Label>
-                    <Input id="title" placeholder="Enter meeting title" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label>Date</Label>
-                      <Input type="date" />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Time</Label>
-                      <Select defaultValue="09:00">
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="09:00">09:00 AM</SelectItem>
-                          <SelectItem value="09:30">09:30 AM</SelectItem>
-                          <SelectItem value="10:00">10:00 AM</SelectItem>
-                          <SelectItem value="10:30">10:30 AM</SelectItem>
-                          <SelectItem value="11:00">11:00 AM</SelectItem>
-                          <SelectItem value="11:30">11:30 AM</SelectItem>
-                          <SelectItem value="12:00">12:00 PM</SelectItem>
-                          <SelectItem value="12:30">12:30 PM</SelectItem>
-                          <SelectItem value="13:00">01:00 PM</SelectItem>
-                          <SelectItem value="13:30">01:30 PM</SelectItem>
-                          <SelectItem value="14:00">02:00 PM</SelectItem>
-                          <SelectItem value="14:30">02:30 PM</SelectItem>
-                          <SelectItem value="15:00">03:00 PM</SelectItem>
-                          <SelectItem value="15:30">03:30 PM</SelectItem>
-                          <SelectItem value="16:00">04:00 PM</SelectItem>
-                          <SelectItem value="16:30">04:30 PM</SelectItem>
-                          <SelectItem value="17:00">05:00 PM</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label>Duration</Label>
-                      <Select defaultValue="30">
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select duration" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="15">15 minutes</SelectItem>
-                          <SelectItem value="30">30 minutes</SelectItem>
-                          <SelectItem value="45">45 minutes</SelectItem>
-                          <SelectItem value="60">1 hour</SelectItem>
-                          <SelectItem value="90">1.5 hours</SelectItem>
-                          <SelectItem value="120">2 hours</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Meeting Type</Label>
-                      <Select defaultValue="video">
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="video">Video Conference</SelectItem>
-                          <SelectItem value="audio">Audio Only</SelectItem>
-                          <SelectItem value="in-person">In Person</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="participants">Participants</Label>
-                    <Input id="participants" placeholder="Add participants by email or name" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="description">Description (Optional)</Label>
-                    <Input id="description" placeholder="Add meeting description or agenda" />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={() => setIsCreateDialogOpen(false)}>Create Meeting</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <CreateMeetingDialog/>
           </div>
         </div>
 
         <div className="space-y-6">
           <Tabs defaultValue="upcoming" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsList className="grid grid-cols-3 mb-6">
               <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               <TabsTrigger value="past">Past</TabsTrigger>
               <TabsTrigger value="all">All Meetings</TabsTrigger>

@@ -4,7 +4,7 @@ import Facebook from "../assets/fb.svg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Video } from "lucide-react"
+import Logo from "@/components/custom/logo";
 
 export default function AuthPage() {
     const handleOAuthLogin = (provider: string) => {
@@ -16,10 +16,8 @@ export default function AuthPage() {
             <div className="w-full max-w-md">
                 {/* Logo/Brand Section */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 bg-muted">
-                        <Video className="w-8 h-8" />
-                    </div>
-                    <h1 className="text-2xl font-bold">MeetSpace</h1>
+                    <Logo/>
+                    <h1 className="text-2xl font-bold mt-4">MeetSpace</h1>
                     <p className="mt-1 text-muted-foreground">Connect, collaborate, communicate</p>
                 </div>
 
