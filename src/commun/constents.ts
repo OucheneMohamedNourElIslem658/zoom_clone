@@ -1,0 +1,1 @@
+export const logo = "https://vectorwiki.com/images/wMZMt__google-meet.svg";
