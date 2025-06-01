@@ -182,7 +182,7 @@ const ChatSection = ({
 }) => {
   return (
     <div className="flex-1 flex flex-col">
-        <div className="flex-1 mb-4 px-6">
+        <div className="flex-1 mb-4 px-6 flex flex-col gap-3">
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
