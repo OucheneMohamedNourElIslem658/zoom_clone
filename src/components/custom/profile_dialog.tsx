@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
-import { Textarea } from "@/components/ui/textarea"
 import { Bell, Camera, User } from "lucide-react"
 
 interface ProfileDialogProps {
@@ -19,6 +18,8 @@ interface ProfileDialogProps {
 export function ProfileDialog({ user, isOpen, onOpenChange }: ProfileDialogProps) {
   const [notifications, setNotifications] = useState(true)
   const [emailNotifications, setEmailNotifications] = useState(false)
+
+  const userInfo = user.user_metadata
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -45,38 +46,24 @@ export function ProfileDialog({ user, isOpen, onOpenChange }: ProfileDialogProps
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <Avatar className="w-20 h-20">
-                    <AvatarImage src={user.image || "/placeholder.svg?height=80&width=80"} alt={user.name} />
-                    <AvatarFallback className="text-lg">{user.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={userInfo.avatar_url || "/placeholder.svg?height=80&width=80"} alt={userInfo.name} />
+                    <AvatarFallback className="text-lg">{userInfo.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <Button size="sm" variant="outline" className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0">
                     <Camera className="w-4 h-4" />
                   </Button>
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-medium">{user.name}</h3>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <h3 className="font-medium">{userInfo.name}</h3>
+                  <p className="text-sm text-muted-foreground">{userInfo.email}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div>
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" defaultValue="Alex" />
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input id="fullName" defaultValue={userInfo.name} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" defaultValue="Johnson" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue={user.email} />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea id="bio" placeholder="Tell us about yourself..." className="min-h-[80px]" />
               </div>
             </CardContent>
           </Card>

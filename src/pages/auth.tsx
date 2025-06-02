@@ -5,14 +5,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import Logo from "@/components/custom/logo";
+import { useState } from "react";
+import { signInWithOAuth } from "@/services/auth";
+import { toast } from "sonner";
 
 export default function AuthPage() {
-    const handleOAuthLogin = (provider: string) => {
-        console.log(`Logging in with ${provider}`)
-    }
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleOAuthLogin = async (provider: "google" | "facebook") => {
+        setIsLoading(true);
+        try {
+            await signInWithOAuth(provider);
+        } catch (err) {
+            toast(`Failed to sign in with ${provider}. Please try again.`)
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 dark">
+        <div className="min-h-screen flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 {/* Logo/Brand Section */}
                 <div className="text-center mb-8">
@@ -32,6 +44,7 @@ export default function AuthPage() {
                                 variant="outline"
                                 className="w-full flex items-center justify-center gap-2 h-11"
                                 onClick={() => handleOAuthLogin("google")}
+                                disabled={isLoading}
                             >
                                 <img src={Google} alt="google" className="h-5 w-5" />
                                 Continue with Google
@@ -41,20 +54,10 @@ export default function AuthPage() {
                                 variant="outline"
                                 className="w-full flex items-center justify-center gap-2 h-11"
                                 onClick={() => handleOAuthLogin("facebook")}
+                                disabled={isLoading}
                             >
                                 <img src={Facebook} alt="facebook" className="h-5 w-5" />
                                 Continue with Facebook
-                            </Button>
-
-                            <Button
-                                variant="outline"
-                                className="w-full flex items-center justify-center gap-2 h-11"
-                                onClick={() => handleOAuthLogin("custom")}
-                            >
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
-                                </svg>
-                                Continue with Custom Provider
                             </Button>
                         </div>
 
