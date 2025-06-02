@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge"
 import {
   Copy,
   Clock,
-  Maximize,
 } from "lucide-react"
 
 const MeetTopBar = () => {
@@ -24,9 +23,6 @@ const MeetTopBar = () => {
                 <Button variant="outline" size="sm" className="hidden md:flex">
                     <Copy className="w-4 h-4 mr-2" />
                     Copy Link
-                </Button>
-                <Button variant="ghost" size="sm" className="hidden sm:flex">
-                    <Maximize className="w-4 h-4" />
                 </Button>
             </div>
         </div>

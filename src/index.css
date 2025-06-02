@@ -118,3 +118,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+::selection {
+  background-color: hsl(178.6deg 84.31% 10%);
+  color: hsl(172.46deg 66.01% 50.39%);
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background-color: hsl(178.6deg 84.31% 10%);
+  color: hsl(172.46deg 66.01% 50.39%);
+  text-shadow: none;
+}

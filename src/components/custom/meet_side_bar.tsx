@@ -39,14 +39,14 @@ const MeetingSidebar = ({ participants, isSidebarOpen, onSidebarOpenChange }: Me
     { id: 2, sender: "Bob Smith", message: "Good morning! Ready for the presentation?", time: "10:31 AM" },
     { id: 3, sender: "You", message: "Yes, let's get started", time: "10:32 AM" },
     { id: 4, sender: "Carol Davis", message: "Can everyone see my screen?", time: "10:35 AM" },
-    { id: 14, sender: "Alice Johnson", message: "Hello everyone!", time: "10:30 AM" },
-    { id: 24, sender: "Bob Smith", message: "Good morning! Ready for the presentation?", time: "10:31 AM" },
-    { id: 34, sender: "You", message: "Yes, let's get started", time: "10:32 AM" },
-    { id: 44, sender: "Carol Davis", message: "Can everyone see my screen?", time: "10:35 AM" },
-    { id: 14, sender: "Alice Johnson", message: "Hello everyone!", time: "10:30 AM" },
-    { id: 24, sender: "Bob Smith", message: "Good morning! Ready for the presentation?", time: "10:31 AM" },
-    { id: 34, sender: "You", message: "Yes, let's get started", time: "10:32 AM" },
-    { id: 44, sender: "Carol Davis", message: "Can everyone see my screen?", time: "10:35 AM" },
+    { id: 1, sender: "Alice Johnson", message: "Hello everyone!", time: "10:30 AM" },
+    { id: 2, sender: "Bob Smith", message: "Good morning! Ready for the presentation?", time: "10:31 AM" },
+    { id: 3, sender: "You", message: "Yes, let's get started", time: "10:32 AM" },
+    { id: 4, sender: "Carol Davis", message: "Can everyone see my screen?", time: "10:35 AM" },
+    { id: 1, sender: "Alice Johnson", message: "Hello everyone!", time: "10:30 AM" },
+    { id: 2, sender: "Bob Smith", message: "Good morning! Ready for the presentation?", time: "10:31 AM" },
+    { id: 3, sender: "You", message: "Yes, let's get started", time: "10:32 AM" },
+    { id: 4, sender: "Carol Davis", message: "Can everyone see my screen?", time: "10:35 AM" },
   ]
 
   const handleSendMessage = () => {
@@ -59,28 +59,28 @@ const MeetingSidebar = ({ participants, isSidebarOpen, onSidebarOpenChange }: Me
   return (
     <Sheet open={isSidebarOpen} onOpenChange={onSidebarOpenChange}>
       <SheetContent side="right" className="w-full sm:w-96 p-0 flex flex-col [&>button:first-of-type]:hidden">
-        <SheetTitle className="relative mb-5">
+        <SheetTitle className="relative mb-7">
             <SheetClose className="absolute top-4 right-4">
                 <X/>
             </SheetClose>
         </SheetTitle>
-        <Tabs defaultValue="participants" className="flex-1 flex flex-col p-4">
-          <TabsList className="grid grid-cols-2 w-full">
-            <TabsTrigger value="participants" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Participants ({participants.length})
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" />
-              Chat
-            </TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="participants" className="flex-1 flex flex-col">
+            <TabsList className="grid grid-cols-2 w-[calc(100%-2rem)] mx-4">
+              <TabsTrigger value="participants" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Participants ({participants.length})
+              </TabsTrigger>
+              <TabsTrigger value="chat" className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                Chat
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="participants" className="flex-1 mt-4">
+          <TabsContent value="participants" className="flex-1">
             <ParticipantsList participants={participants} />
           </TabsContent>
 
-          <TabsContent value="chat" className="flex-1 mt-4 flex flex-col">
+          <TabsContent value="chat" className="flex-1 flex flex-col">
             <ChatSection
               messages={chatMessages}
               newMessage={newMessage}
@@ -97,12 +97,8 @@ const MeetingSidebar = ({ participants, isSidebarOpen, onSidebarOpenChange }: Me
 const ParticipantsList = ({ participants }: { participants: Participant[] }) => {
   return (
     <div className="flex-1 w-full">
-      <div className="mb-4">
-        <h3 className="text-sm font-medium text-muted-foreground mb-3">Meeting Participants</h3>
-      </div>
-
-      <ScrollArea className="h-[calc(100vh-200px)]">
-        <div className="space-y-2">
+      <ScrollArea className="h-[calc(100vh)]">
+        <div className="space-y-2 mb-[100px]">
           {participants.map((participant) => (
             <ParticipantCard key={participant.id} participant={participant} />
           ))}
@@ -114,7 +110,7 @@ const ParticipantsList = ({ participants }: { participants: Participant[] }) => 
 
 const ParticipantCard = ({ participant }: { participant: Participant }) => {
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-colors">
+    <div className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-colors mx-4">
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <Avatar className="w-10 h-10 shrink-0">
           <AvatarImage src="/placeholder.svg?height=40&width=40" />
@@ -182,32 +178,34 @@ const ChatSection = ({
 }) => {
   return (
     <div className="flex-1 flex flex-col">
-        <div className="flex-1 mb-4 px-6 flex flex-col gap-3">
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
-            ))}
+      <ScrollArea className="h-[calc(100vh)]">
+        <div className="flex-1 mb-[190px] px-6 flex flex-col gap-3 pt-4">
+          {messages.map((message) => (
+            <ChatMessage key={message.id} message={message} />
+          ))}
         </div>
+      </ScrollArea>
 
-        <div className="sticky bottom-0 left-0 right-0 bg-background border-t w-full pt-4 pb-4">
-            <div className="space-y-3">
-                <div className="flex gap-2">
-                    <Input
-                        placeholder="Type a message..."
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                            onSendMessage()
-                            }
-                        }}
-                        className="flex-1"
-                    />
-                    <Button size="sm" onClick={onSendMessage} disabled={!newMessage.trim()}>
-                        <Send className="w-4 h-4" />
-                    </Button>
-                </div>
-            </div>
+      <div className="sticky bottom-0 left-0 right-0 bg-background border-t w-full p-4">
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Type a message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    onSendMessage()
+                  }
+              }}
+              className="flex-1"
+            />
+            <Button size="sm" onClick={onSendMessage} disabled={!newMessage.trim()}>
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
+      </div>
     </div>
   )
 }

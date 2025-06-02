@@ -19,6 +19,18 @@ export default function MeetPage() {
     { id: 4, name: "Carol Davis", avatar: "CD", isMuted: false, isVideoOff: true, isHost: false },
     { id: 5, name: "David Wilson", avatar: "DW", isMuted: false, isVideoOff: false, isHost: false },
     { id: 6, name: "Emma Brown", avatar: "EB", isMuted: true, isVideoOff: false, isHost: false },
+    { id: 1, name: "You", avatar: "YO", isMuted: isMuted, isVideoOff: isVideoOff, isHost: true },
+    { id: 2, name: "Alice Johnson", avatar: "AJ", isMuted: false, isVideoOff: false, isHost: false },
+    { id: 3, name: "Bob Smith", avatar: "BS", isMuted: true, isVideoOff: false, isHost: false },
+    { id: 4, name: "Carol Davis", avatar: "CD", isMuted: false, isVideoOff: true, isHost: false },
+    { id: 5, name: "David Wilson", avatar: "DW", isMuted: false, isVideoOff: false, isHost: false },
+    { id: 6, name: "Emma Brown", avatar: "EB", isMuted: true, isVideoOff: false, isHost: false },
+    { id: 1, name: "You", avatar: "YO", isMuted: isMuted, isVideoOff: isVideoOff, isHost: true },
+    { id: 2, name: "Alice Johnson", avatar: "AJ", isMuted: false, isVideoOff: false, isHost: false },
+    { id: 3, name: "Bob Smith", avatar: "BS", isMuted: true, isVideoOff: false, isHost: false },
+    { id: 4, name: "Carol Davis", avatar: "CD", isMuted: false, isVideoOff: true, isHost: false },
+    { id: 5, name: "David Wilson", avatar: "DW", isMuted: false, isVideoOff: false, isHost: false },
+    { id: 6, name: "Emma Brown", avatar: "EB", isMuted: true, isVideoOff: false, isHost: false },
   ]
 
   return (
