@@ -106,7 +106,7 @@ const CreateMeetingDialog = () => {
                                     <h3 className="font-medium">Schedule</h3>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 md: gap-4">
                                     <div className="space-y-2">
                                         <Label className="text-sm font-medium flex items-center gap-2 white">
                                             <Calendar className="w-3 h-3 white" />
@@ -139,24 +139,6 @@ const CreateMeetingDialog = () => {
                                                         </SelectItem>
                                                     )
                                                 })}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-medium">Duration *</Label>
-                                        <Select defaultValue="60">
-                                            <SelectTrigger className="h-11">
-                                                <SelectValue placeholder="Select duration" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="15">15 minutes</SelectItem>
-                                                <SelectItem value="30">30 minutes</SelectItem>
-                                                <SelectItem value="45">45 minutes</SelectItem>
-                                                <SelectItem value="60">1 hour</SelectItem>
-                                                <SelectItem value="90">1.5 hours</SelectItem>
-                                                <SelectItem value="120">2 hours</SelectItem>
-                                                <SelectItem value="180">3 hours</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
