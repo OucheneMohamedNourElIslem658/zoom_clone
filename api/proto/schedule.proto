@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package schedule;
+
+option go_package = ".";
+
+import "google/protobuf/timestamp.proto";
+
+enum MeetingType {
+    VIDEO = 0;
+    AUDIO = 1;
+}
+
+message Meeting {
+    uint32 id = 1;
+    string title = 2;
+    string description = 3;
+    MeetingType type = 4;
+    google.protobuf.Timestamp start_time = 5;
+    uint32 participants_count = 6;
+    MeetParticipant host = 7;
+    bool is_cancelled = 8;
+    repeated MeetParticipant first_three_participants = 9;
+}
+
+message MeetParticipant {
+    string id = 2;
+    string avatar_url = 3;
+    string name = 4;
+    string email = 5;
+}
+
+message CreateMeetingRequest {
+    string title = 1;
+    string description = 2;
+    google.protobuf.Timestamp start_time = 3;
+    MeetingType type = 4;
+    repeated string participant_ids = 5;
+}
+
+message CreateMeetingResponse {
+    Meeting meeting = 1;
+}
+
+message UpdateMeetingRequest {
+    uint32 id = 1;
+    string title = 2;
+    string description = 3;
+    google.protobuf.Timestamp start_time = 4;
+    MeetingType type = 5;
+    repeated string participant_ids = 6;
+}
+
+message UpdateMeetingResponse {
+    Meeting meeting = 1;
+}
+
+message SearchMeetingsRequest {
+    enum MeetingCategory {
+        UPCOMING = 0;
+        PASSED = 1;
+        ALL = 2;
+    }
+
+    string query = 1;
+    MeetingCategory category = 4;
+    uint32 last_id = 5;
+    uint32 page_size = 6;
+}
+
+message SearchMeetingsResponse {
+    repeated Meeting meetings = 1;
+}
+
+message SearchParticipantsRequest {
+    string query = 1;
+    uint32 last_id = 2;
+    uint32 page_size = 3;
+}
+
+message SearchParticipantsResponse {
+    repeated MeetParticipant participants = 1;
+}
+
+service ScheduleService {
+    rpc CreateMeeting (CreateMeetingRequest) returns (CreateMeetingResponse);
+    rpc UpdateMeeting (UpdateMeetingRequest) returns (UpdateMeetingResponse);
+    rpc SearchMeetings (SearchMeetingsRequest) returns (SearchMeetingsResponse);
+    rpc SearchParticipants (SearchParticipantsRequest) returns (SearchParticipantsResponse);
+}
