@@ -4,6 +4,7 @@ package schedule;
 
 option go_package = ".";
 
+import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 
 enum MeetingType {
@@ -24,7 +25,7 @@ message Meeting {
 }
 
 message MeetParticipant {
-    string id = 2;
+    string id = 2 [(buf.validate.field).string.uuid = true];
     string avatar_url = 3;
     string name = 4;
     string email = 5;
