@@ -25,18 +25,31 @@ message Meeting {
 }
 
 message MeetParticipant {
-    string id = 2 [(buf.validate.field).string.uuid = true];
+    string id = 2;
     string avatar_url = 3;
     string name = 4;
     string email = 5;
 }
 
 message CreateMeetingRequest {
-    string title = 1;
+    string title = 1 [(buf.validate.field).required = true];
     string description = 2;
-    google.protobuf.Timestamp start_time = 3;
-    MeetingType type = 4;
-    repeated string participant_ids = 5;
+    google.protobuf.Timestamp start_time = 3 [
+        (buf.validate.field).required = true,
+        (buf.validate.field).timestamp.gt_now = true
+    ];
+    MeetingType type = 4 [
+        (buf.validate.field).enum.defined_only = true
+    ];
+    repeated string participant_ids = 5 [
+        (buf.validate.field).repeated.min_items = 1,
+        (buf.validate.field).repeated.unique = true,
+        (buf.validate.field).repeated.items = {
+            string: {
+                uuid: true,
+            }
+        }
+    ];
 }
 
 message CreateMeetingResponse {

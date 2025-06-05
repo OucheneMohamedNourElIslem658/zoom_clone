@@ -8,6 +8,8 @@ import (
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/internal/interceptors"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/auth"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/database"
+	schedule "github.com/OucheneMohamedNourElIslem658/zoom_clone/internal/schedule"
+	pb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
 	"google.golang.org/grpc"
 )
 
@@ -32,11 +34,18 @@ func main()  {
 	)
 
 	// Register your gRPC services here
-	// ...
+	scheduleHandler := schedule.NewScheduleHandler()
+	pb.RegisterScheduleServiceServer(grpcServer, scheduleHandler)
 
 	// Run the gRPC server
 	log.Printf("gRPC server is running on %s:%s", config.GRPCHost, config.GRPCPort)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve gRPC server: %v", err)
 	}
+}
+
+type Violation struct {
+	Field   string `json:"field"`
+	Code    string `json:"code"`
+	Message string `json:"message"`
 }

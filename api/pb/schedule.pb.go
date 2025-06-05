@@ -773,20 +773,20 @@ const file_schedule_proto_rawDesc = "" +
 	"\x12participants_count\x18\x06 \x01(\rR\x11participantsCount\x12-\n" +
 	"\x04host\x18\a \x01(\v2\x19.schedule.MeetParticipantR\x04host\x12!\n" +
 	"\fis_cancelled\x18\b \x01(\bR\visCancelled\x12S\n" +
-	"\x18first_three_participants\x18\t \x03(\v2\x19.schedule.MeetParticipantR\x16firstThreeParticipants\"t\n" +
-	"\x0fMeetParticipant\x12\x18\n" +
-	"\x02id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12\x1d\n" +
+	"\x18first_three_participants\x18\t \x03(\v2\x19.schedule.MeetParticipantR\x16firstThreeParticipants\"j\n" +
+	"\x0fMeetParticipant\x12\x0e\n" +
+	"\x02id\x18\x02 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
 	"avatar_url\x18\x03 \x01(\tR\tavatarUrl\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x05 \x01(\tR\x05email\"\xdd\x01\n" +
-	"\x14CreateMeetingRequest\x12\x14\n" +
-	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x129\n" +
+	"\x05email\x18\x05 \x01(\tR\x05email\"\x8f\x02\n" +
+	"\x14CreateMeetingRequest\x12\x1c\n" +
+	"\x05title\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x05title\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12F\n" +
 	"\n" +
-	"start_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x12)\n" +
-	"\x04type\x18\x04 \x01(\x0e2\x15.schedule.MeetingTypeR\x04type\x12'\n" +
-	"\x0fparticipant_ids\x18\x05 \x03(\tR\x0eparticipantIds\"D\n" +
+	"start_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\v\xbaH\b\xc8\x01\x01\xb2\x01\x02@\x01R\tstartTime\x123\n" +
+	"\x04type\x18\x04 \x01(\x0e2\x15.schedule.MeetingTypeB\b\xbaH\x05\x82\x01\x02\x10\x01R\x04type\x12:\n" +
+	"\x0fparticipant_ids\x18\x05 \x03(\tB\x11\xbaH\x0e\x92\x01\v\b\x01\x18\x01\"\x05r\x03\xb0\x01\x01R\x0eparticipantIds\"D\n" +
 	"\x15CreateMeetingResponse\x12+\n" +
 	"\ameeting\x18\x01 \x01(\v2\x11.schedule.MeetingR\ameeting\"\xed\x01\n" +
 	"\x14UpdateMeetingRequest\x12\x0e\n" +
