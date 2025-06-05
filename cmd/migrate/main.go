@@ -1,4 +1,4 @@
-package migrate
+package main
 
 import "github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/database"
 

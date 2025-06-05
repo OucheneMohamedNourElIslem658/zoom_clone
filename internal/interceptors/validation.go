@@ -2,7 +2,6 @@ package interceptors
 
 import (
 	"context"
-	"log"
 
 	"buf.build/go/protovalidate"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/utils"
@@ -23,8 +22,6 @@ func Validation() grpc.UnaryServerInterceptor {
 			}
 			return nil, err
 		}
-
-		log.Println("passed validation for request:", info.FullMethod)
 
 		return handler(ctx, req)
 	}

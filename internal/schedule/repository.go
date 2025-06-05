@@ -1,6 +1,7 @@
 package schedule
 
 import (
+	"strings"
 	"time"
 
 	schedulepb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
@@ -8,6 +9,7 @@ import (
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/database"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 )
 
@@ -31,16 +33,16 @@ func (sr *ScheduleRepo) CreateMeeting(hostID string, meeting *schedulepb.CreateM
 	err = sr.database.Create(createdMeeting).Error
 
 	if err != nil {
-		err = status.Error(codes.Internal,  "Failed to create meeting")
+		err = status.Error(codes.Internal, "Failed to create meeting")
 		return err
 	}
 
 	participants := make([]models.MeetParticipant, 0, len(meeting.ParticipantIds))
 	for _, participantId := range meeting.ParticipantIds {
 		participants = append(participants, models.MeetParticipant{
-			UserID: participantId,
+			UserID:    participantId,
 			MeetingID: createdMeeting.ID,
-			IsHost: false,
+			IsHost:    false,
 		})
 	}
 
@@ -63,7 +65,7 @@ func (sr *ScheduleRepo) CreateMeeting(hostID string, meeting *schedulepb.CreateM
 		err = status.Error(codes.Internal, "Failed to create participants")
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -127,10 +129,10 @@ func (sr *ScheduleRepo) UpdateMeeting(hostID string, meeting *schedulepb.UpdateM
 		}
 
 		if err := sr.database.
-				Where("meeting_id = ? AND is_host = ?", existingMeeting.ID, false).
-				Delete(&models.MeetParticipant{}).Error; err != nil {
-				return status.Error(codes.Internal, "Failed to remove old participants")
-			}
+			Where("meeting_id = ? AND is_host = ?", existingMeeting.ID, false).
+			Delete(&models.MeetParticipant{}).Error; err != nil {
+			return status.Error(codes.Internal, "Failed to remove old participants")
+		}
 
 		if len(newParticipants) > 0 {
 			if err := sr.database.Create(&newParticipants).Error; err != nil {
@@ -146,36 +148,88 @@ func (sr *ScheduleRepo) UpdateMeeting(hostID string, meeting *schedulepb.UpdateM
 	return nil
 }
 
-func (sr *ScheduleRepo) GetAllMeetings(userID string, searchRequest *schedulepb.SearchMeetingsRequest) ([]models.Meeting, error) {
+func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeetingsRequest) (*schedulepb.SearchMeetingsResponse, error) {
 	var meetings []models.Meeting
-	db := sr.database.Model(&models.Meeting{})
 
-	if searchRequest.Query != "" {
-		db = db.Joins("JOIN meet_participants ON meet_participants.meeting_id = meetings.id").
-			Where("meet_participants.user_id = ? AND (title ILIKE ? OR description ILIKE ?)", userID, "%"+searchRequest.Query+"%", "%"+searchRequest.Query+"%")
+	db := sr.database.Model(&models.Meeting{}).
+		Joins("JOIN meet_participants ON meet_participants.meeting_id = meetings.id").
+		Where("meet_participants.user_id = ?", userID)
+
+	if req.Query != "" {
+		query := "%" + strings.ToLower(req.Query) + "%"
+		db = db.Where("LOWER(meetings.title) LIKE ? OR LOWER(meetings.description) LIKE ?", query, query)
 	}
 
-	switch searchRequest.Category {
+	switch req.Category {
 	case schedulepb.SearchMeetingsRequest_UPCOMING:
-		db = db.Where("start_time > NOW()")
+		db = db.Where("meetings.start_time > NOW()")
 	case schedulepb.SearchMeetingsRequest_PASSED:
-		db = db.Where("start_time <= NOW()")
+		db = db.Where("meetings.start_time <= NOW()")
 	case schedulepb.SearchMeetingsRequest_ALL:
-		// By default is all
+		// no filtering needed
 	default:
-		// is will not happen
+		// invalid input fallback (no-op)
 	}
 
-	if searchRequest.LastId != nil {
-		db = db.Where("id > ?", *searchRequest.LastId)
+	// Optional pagination
+	if req.LastId != nil {
+		db = db.Where("meetings.id > ?", *req.LastId)
 	}
-	if searchRequest.PageSize > 0 {
-		db = db.Limit(int(searchRequest.PageSize))
-	}
-
-	if err := db.Order("id ASC").Find(&meetings).Error; err != nil {
-		return nil, status.Error(codes.Internal, "Failed to fetch meetings")
+	if req.PageSize > 0 {
+		db = db.Limit(int(req.PageSize))
 	}
 
-	return meetings, nil
+	// Preload up to 4 participants per meeting, prioritizing the host
+	db = db.Preload("Participants", func(tx *gorm.DB) *gorm.DB {
+		return tx.
+			Joins("JOIN meet_participants ON meet_participants.user_id = users.id").
+			Order("meet_participants.is_host DESC").
+			Limit(4)
+	})
+
+	// Final query
+	if err := db.Order("meetings.id ASC").Find(&meetings).Error; err != nil {
+		return nil, status.Error(codes.Internal, "FAILED_TO_FETCH_MEETINGS")
+	}
+
+	// Transform into protobuf response
+	meetingResponses := make([]*schedulepb.Meeting, 0, len(meetings))
+	for _, m := range meetings {
+		var host *schedulepb.MeetParticipant
+		var others []*schedulepb.MeetParticipant
+
+		for i, p := range m.Participants {
+			participant := &schedulepb.MeetParticipant{
+				Id:        p.ID,
+				Email:     p.Email,
+				Name:      p.RawUserMetaData.Name,
+				AvatarUrl: p.RawUserMetaData.AvatarURL,
+			}
+
+			if i == 0 {
+				host = participant
+			} else {
+				others = append(others, participant)
+			}
+		}
+
+		meetingResponses = append(meetingResponses, &schedulepb.Meeting{
+			Id:                     uint32(m.ID),
+			Title:                  m.Title,
+			Description:            m.Description,
+			StartTime:              timestamppb.New(m.StartTime),
+			IsCancelled:            m.IsCancelled,
+			Type:                   schedulepb.MeetingType(schedulepb.MeetingType_value[string(m.Type)]),
+			Host:                   host,
+			FirstThreeParticipants: others,
+		})
+	}
+
+	return &schedulepb.SearchMeetingsResponse{
+		Meetings: meetingResponses,
+	}, nil
 }
+
+
+// func (sr *ScheduleRepo) GetUsers(userID string) ([]models.User, error) {
+// }

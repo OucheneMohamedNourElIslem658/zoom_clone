@@ -73,22 +73,22 @@ func (MeetingType) EnumDescriptor() ([]byte, []int) {
 type SearchMeetingsRequest_MeetingCategory int32
 
 const (
-	SearchMeetingsRequest_UPCOMING SearchMeetingsRequest_MeetingCategory = 0
+	SearchMeetingsRequest_ALL      SearchMeetingsRequest_MeetingCategory = 0
 	SearchMeetingsRequest_PASSED   SearchMeetingsRequest_MeetingCategory = 1
-	SearchMeetingsRequest_ALL      SearchMeetingsRequest_MeetingCategory = 2
+	SearchMeetingsRequest_UPCOMING SearchMeetingsRequest_MeetingCategory = 2
 )
 
 // Enum value maps for SearchMeetingsRequest_MeetingCategory.
 var (
 	SearchMeetingsRequest_MeetingCategory_name = map[int32]string{
-		0: "UPCOMING",
+		0: "ALL",
 		1: "PASSED",
-		2: "ALL",
+		2: "UPCOMING",
 	}
 	SearchMeetingsRequest_MeetingCategory_value = map[string]int32{
-		"UPCOMING": 0,
+		"ALL":      0,
 		"PASSED":   1,
-		"ALL":      2,
+		"UPCOMING": 2,
 	}
 )
 
@@ -558,7 +558,7 @@ func (x *SearchMeetingsRequest) GetCategory() SearchMeetingsRequest_MeetingCateg
 	if x != nil {
 		return x.Category
 	}
-	return SearchMeetingsRequest_UPCOMING
+	return SearchMeetingsRequest_ALL
 }
 
 func (x *SearchMeetingsRequest) GetLastId() uint32 {
@@ -773,11 +773,11 @@ const file_schedule_proto_rawDesc = "" +
 	"\bcategory\x18\x04 \x01(\x0e2/.schedule.SearchMeetingsRequest.MeetingCategoryB\b\xbaH\x05\x82\x01\x02\x10\x01R\bcategory\x12\x1c\n" +
 	"\alast_id\x18\x05 \x01(\rH\x00R\x06lastId\x88\x01\x01\x12\x1b\n" +
 	"\tpage_size\x18\x06 \x01(\rR\bpageSize\"4\n" +
-	"\x0fMeetingCategory\x12\f\n" +
-	"\bUPCOMING\x10\x00\x12\n" +
+	"\x0fMeetingCategory\x12\a\n" +
+	"\x03ALL\x10\x00\x12\n" +
 	"\n" +
-	"\x06PASSED\x10\x01\x12\a\n" +
-	"\x03ALL\x10\x02B\n" +
+	"\x06PASSED\x10\x01\x12\f\n" +
+	"\bUPCOMING\x10\x02B\n" +
 	"\n" +
 	"\b_last_id\"G\n" +
 	"\x16SearchMeetingsResponse\x12-\n" +

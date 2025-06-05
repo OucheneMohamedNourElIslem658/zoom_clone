@@ -85,9 +85,9 @@ message UpdateMeetingResponse {
 
 message SearchMeetingsRequest {
     enum MeetingCategory {
-        UPCOMING = 0;
+        ALL = 0;
         PASSED = 1;
-        ALL = 2;
+        UPCOMING = 2;
     }
 
     string query = 1;
