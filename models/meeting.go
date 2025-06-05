@@ -16,6 +16,7 @@ type Meeting struct {
 	Title        string      `json:"title"`
 	Description  string      `json:"description"`
 	StartTime    time.Time   `json:"start_time"`
+	IsCancelled  bool        `json:"is_cancelled" gorm:"default:false"`
 	Participants []User      `json:"participants" gorm:"many2many:meet_participants;"`
 	Type         MeetingType `json:"type" gorm:"type:varchar(16)"`
 	CreatedAt    time.Time   `json:"created_at" gorm:"autoCreateTime"`

@@ -31,7 +31,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ScheduleServiceClient interface {
 	CreateMeeting(ctx context.Context, in *CreateMeetingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	UpdateMeeting(ctx context.Context, in *UpdateMeetingRequest, opts ...grpc.CallOption) (*UpdateMeetingResponse, error)
+	UpdateMeeting(ctx context.Context, in *UpdateMeetingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	SearchMeetings(ctx context.Context, in *SearchMeetingsRequest, opts ...grpc.CallOption) (*SearchMeetingsResponse, error)
 	SearchParticipants(ctx context.Context, in *SearchParticipantsRequest, opts ...grpc.CallOption) (*SearchParticipantsResponse, error)
 }
@@ -54,9 +54,9 @@ func (c *scheduleServiceClient) CreateMeeting(ctx context.Context, in *CreateMee
 	return out, nil
 }
 
-func (c *scheduleServiceClient) UpdateMeeting(ctx context.Context, in *UpdateMeetingRequest, opts ...grpc.CallOption) (*UpdateMeetingResponse, error) {
+func (c *scheduleServiceClient) UpdateMeeting(ctx context.Context, in *UpdateMeetingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateMeetingResponse)
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, ScheduleService_UpdateMeeting_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func (c *scheduleServiceClient) SearchParticipants(ctx context.Context, in *Sear
 // for forward compatibility.
 type ScheduleServiceServer interface {
 	CreateMeeting(context.Context, *CreateMeetingRequest) (*emptypb.Empty, error)
-	UpdateMeeting(context.Context, *UpdateMeetingRequest) (*UpdateMeetingResponse, error)
+	UpdateMeeting(context.Context, *UpdateMeetingRequest) (*emptypb.Empty, error)
 	SearchMeetings(context.Context, *SearchMeetingsRequest) (*SearchMeetingsResponse, error)
 	SearchParticipants(context.Context, *SearchParticipantsRequest) (*SearchParticipantsResponse, error)
 	mustEmbedUnimplementedScheduleServiceServer()
@@ -105,7 +105,7 @@ type UnimplementedScheduleServiceServer struct{}
 func (UnimplementedScheduleServiceServer) CreateMeeting(context.Context, *CreateMeetingRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateMeeting not implemented")
 }
-func (UnimplementedScheduleServiceServer) UpdateMeeting(context.Context, *UpdateMeetingRequest) (*UpdateMeetingResponse, error) {
+func (UnimplementedScheduleServiceServer) UpdateMeeting(context.Context, *UpdateMeetingRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateMeeting not implemented")
 }
 func (UnimplementedScheduleServiceServer) SearchMeetings(context.Context, *SearchMeetingsRequest) (*SearchMeetingsResponse, error) {

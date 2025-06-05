@@ -374,11 +374,12 @@ func (x *CreateMeetingRequest) GetParticipantIds() []string {
 type UpdateMeetingRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Id             uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title          string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description    string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	StartTime      *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	Type           MeetingType            `protobuf:"varint,5,opt,name=type,proto3,enum=schedule.MeetingType" json:"type,omitempty"`
+	Title          *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`
+	Description    *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	StartTime      *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3,oneof" json:"start_time,omitempty"`
+	Type           *MeetingType           `protobuf:"varint,5,opt,name=type,proto3,enum=schedule.MeetingType,oneof" json:"type,omitempty"`
 	ParticipantIds []string               `protobuf:"bytes,6,rep,name=participant_ids,json=participantIds,proto3" json:"participant_ids,omitempty"`
+	IsCancelled    *bool                  `protobuf:"varint,7,opt,name=is_cancelled,json=isCancelled,proto3,oneof" json:"is_cancelled,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -421,15 +422,15 @@ func (x *UpdateMeetingRequest) GetId() uint32 {
 }
 
 func (x *UpdateMeetingRequest) GetTitle() string {
-	if x != nil {
-		return x.Title
+	if x != nil && x.Title != nil {
+		return *x.Title
 	}
 	return ""
 }
 
 func (x *UpdateMeetingRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
+	if x != nil && x.Description != nil {
+		return *x.Description
 	}
 	return ""
 }
@@ -442,8 +443,8 @@ func (x *UpdateMeetingRequest) GetStartTime() *timestamppb.Timestamp {
 }
 
 func (x *UpdateMeetingRequest) GetType() MeetingType {
-	if x != nil {
-		return x.Type
+	if x != nil && x.Type != nil {
+		return *x.Type
 	}
 	return MeetingType_VIDEO
 }
@@ -453,6 +454,13 @@ func (x *UpdateMeetingRequest) GetParticipantIds() []string {
 		return x.ParticipantIds
 	}
 	return nil
+}
+
+func (x *UpdateMeetingRequest) GetIsCancelled() bool {
+	if x != nil && x.IsCancelled != nil {
+		return *x.IsCancelled
+	}
+	return false
 }
 
 type UpdateMeetingResponse struct {
@@ -503,7 +511,7 @@ type SearchMeetingsRequest struct {
 	state         protoimpl.MessageState                `protogen:"open.v1"`
 	Query         string                                `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
 	Category      SearchMeetingsRequest_MeetingCategory `protobuf:"varint,4,opt,name=category,proto3,enum=schedule.SearchMeetingsRequest_MeetingCategory" json:"category,omitempty"`
-	LastId        uint32                                `protobuf:"varint,5,opt,name=last_id,json=lastId,proto3" json:"last_id,omitempty"`
+	LastId        *uint32                               `protobuf:"varint,5,opt,name=last_id,json=lastId,proto3,oneof" json:"last_id,omitempty"`
 	PageSize      uint32                                `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -554,8 +562,8 @@ func (x *SearchMeetingsRequest) GetCategory() SearchMeetingsRequest_MeetingCateg
 }
 
 func (x *SearchMeetingsRequest) GetLastId() uint32 {
-	if x != nil {
-		return x.LastId
+	if x != nil && x.LastId != nil {
+		return *x.LastId
 	}
 	return 0
 }
@@ -743,27 +751,35 @@ const file_schedule_proto_rawDesc = "" +
 	"\n" +
 	"start_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\v\xbaH\b\xc8\x01\x01\xb2\x01\x02@\x01R\tstartTime\x123\n" +
 	"\x04type\x18\x04 \x01(\x0e2\x15.schedule.MeetingTypeB\b\xbaH\x05\x82\x01\x02\x10\x01R\x04type\x12:\n" +
-	"\x0fparticipant_ids\x18\x05 \x03(\tB\x11\xbaH\x0e\x92\x01\v\b\x01\x18\x01\"\x05r\x03\xb0\x01\x01R\x0eparticipantIds\"\xed\x01\n" +
-	"\x14UpdateMeetingRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x129\n" +
+	"\x0fparticipant_ids\x18\x05 \x03(\tB\x11\xbaH\x0e\x92\x01\v\b\x01\x18\x01\"\x05r\x03\xb0\x01\x01R\x0eparticipantIds\"\xab\x03\n" +
+	"\x14UpdateMeetingRequest\x12\x16\n" +
+	"\x02id\x18\x01 \x01(\rB\x06\xbaH\x03\xc8\x01\x01R\x02id\x12\"\n" +
+	"\x05title\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x00R\x05title\x88\x01\x01\x12.\n" +
+	"\vdescription\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x01R\vdescription\x88\x01\x01\x12H\n" +
 	"\n" +
-	"start_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x12)\n" +
-	"\x04type\x18\x05 \x01(\x0e2\x15.schedule.MeetingTypeR\x04type\x12'\n" +
-	"\x0fparticipant_ids\x18\x06 \x03(\tR\x0eparticipantIds\"D\n" +
+	"start_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampB\b\xbaH\x05\xb2\x01\x02@\x01H\x02R\tstartTime\x88\x01\x01\x128\n" +
+	"\x04type\x18\x05 \x01(\x0e2\x15.schedule.MeetingTypeB\b\xbaH\x05\x82\x01\x02\x10\x01H\x03R\x04type\x88\x01\x01\x128\n" +
+	"\x0fparticipant_ids\x18\x06 \x03(\tB\x0f\xbaH\f\x92\x01\t\x18\x01\"\x05r\x03\xb0\x01\x01R\x0eparticipantIds\x12&\n" +
+	"\fis_cancelled\x18\a \x01(\bH\x04R\visCancelled\x88\x01\x01B\b\n" +
+	"\x06_titleB\x0e\n" +
+	"\f_descriptionB\r\n" +
+	"\v_start_timeB\a\n" +
+	"\x05_typeB\x0f\n" +
+	"\r_is_cancelled\"D\n" +
 	"\x15UpdateMeetingResponse\x12+\n" +
-	"\ameeting\x18\x01 \x01(\v2\x11.schedule.MeetingR\ameeting\"\xe6\x01\n" +
+	"\ameeting\x18\x01 \x01(\v2\x11.schedule.MeetingR\ameeting\"\x81\x02\n" +
 	"\x15SearchMeetingsRequest\x12\x14\n" +
-	"\x05query\x18\x01 \x01(\tR\x05query\x12K\n" +
-	"\bcategory\x18\x04 \x01(\x0e2/.schedule.SearchMeetingsRequest.MeetingCategoryR\bcategory\x12\x17\n" +
-	"\alast_id\x18\x05 \x01(\rR\x06lastId\x12\x1b\n" +
+	"\x05query\x18\x01 \x01(\tR\x05query\x12U\n" +
+	"\bcategory\x18\x04 \x01(\x0e2/.schedule.SearchMeetingsRequest.MeetingCategoryB\b\xbaH\x05\x82\x01\x02\x10\x01R\bcategory\x12\x1c\n" +
+	"\alast_id\x18\x05 \x01(\rH\x00R\x06lastId\x88\x01\x01\x12\x1b\n" +
 	"\tpage_size\x18\x06 \x01(\rR\bpageSize\"4\n" +
 	"\x0fMeetingCategory\x12\f\n" +
 	"\bUPCOMING\x10\x00\x12\n" +
 	"\n" +
 	"\x06PASSED\x10\x01\x12\a\n" +
-	"\x03ALL\x10\x02\"G\n" +
+	"\x03ALL\x10\x02B\n" +
+	"\n" +
+	"\b_last_id\"G\n" +
 	"\x16SearchMeetingsResponse\x12-\n" +
 	"\bmeetings\x18\x01 \x03(\v2\x11.schedule.MeetingR\bmeetings\"g\n" +
 	"\x19SearchParticipantsRequest\x12\x14\n" +
@@ -774,10 +790,10 @@ const file_schedule_proto_rawDesc = "" +
 	"\fparticipants\x18\x01 \x03(\v2\x19.schedule.MeetParticipantR\fparticipants*#\n" +
 	"\vMeetingType\x12\t\n" +
 	"\x05VIDEO\x10\x00\x12\t\n" +
-	"\x05AUDIO\x10\x012\xe2\x02\n" +
+	"\x05AUDIO\x10\x012\xd9\x02\n" +
 	"\x0fScheduleService\x12G\n" +
-	"\rCreateMeeting\x12\x1e.schedule.CreateMeetingRequest\x1a\x16.google.protobuf.Empty\x12P\n" +
-	"\rUpdateMeeting\x12\x1e.schedule.UpdateMeetingRequest\x1a\x1f.schedule.UpdateMeetingResponse\x12S\n" +
+	"\rCreateMeeting\x12\x1e.schedule.CreateMeetingRequest\x1a\x16.google.protobuf.Empty\x12G\n" +
+	"\rUpdateMeeting\x12\x1e.schedule.UpdateMeetingRequest\x1a\x16.google.protobuf.Empty\x12S\n" +
 	"\x0eSearchMeetings\x12\x1f.schedule.SearchMeetingsRequest\x1a .schedule.SearchMeetingsResponse\x12_\n" +
 	"\x12SearchParticipants\x12#.schedule.SearchParticipantsRequest\x1a$.schedule.SearchParticipantsResponseB\x03Z\x01.b\x06proto3"
 
@@ -828,7 +844,7 @@ var file_schedule_proto_depIdxs = []int32{
 	7,  // 14: schedule.ScheduleService.SearchMeetings:input_type -> schedule.SearchMeetingsRequest
 	9,  // 15: schedule.ScheduleService.SearchParticipants:input_type -> schedule.SearchParticipantsRequest
 	12, // 16: schedule.ScheduleService.CreateMeeting:output_type -> google.protobuf.Empty
-	6,  // 17: schedule.ScheduleService.UpdateMeeting:output_type -> schedule.UpdateMeetingResponse
+	12, // 17: schedule.ScheduleService.UpdateMeeting:output_type -> google.protobuf.Empty
 	8,  // 18: schedule.ScheduleService.SearchMeetings:output_type -> schedule.SearchMeetingsResponse
 	10, // 19: schedule.ScheduleService.SearchParticipants:output_type -> schedule.SearchParticipantsResponse
 	16, // [16:20] is the sub-list for method output_type
@@ -843,6 +859,8 @@ func file_schedule_proto_init() {
 	if File_schedule_proto != nil {
 		return
 	}
+	file_schedule_proto_msgTypes[3].OneofWrappers = []any{}
+	file_schedule_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

@@ -54,12 +54,29 @@ message CreateMeetingRequest {
 }
 
 message UpdateMeetingRequest {
-    uint32 id = 1;
-    string title = 2;
-    string description = 3;
-    google.protobuf.Timestamp start_time = 4;
-    MeetingType type = 5;
-    repeated string participant_ids = 6;
+    uint32 id = 1 [(buf.validate.field).required = true];
+    optional string title = 2 [
+        (buf.validate.field).string.min_len = 1
+    ];
+    optional string description = 3 [
+        (buf.validate.field).string.min_len = 1
+    ];
+    optional google.protobuf.Timestamp start_time = 4 [
+        (buf.validate.field).timestamp.gt_now = true
+    ];
+    optional MeetingType type = 5 [
+        (buf.validate.field).enum.defined_only = true
+    ];
+    repeated string participant_ids = 6 [
+        (buf.validate.field).repeated.unique = true,
+        (buf.validate.field).repeated.items = {
+            string: {
+                uuid: true,
+            }
+        }
+    ];
+
+    optional bool is_cancelled = 7;
 }
 
 message UpdateMeetingResponse {
@@ -74,8 +91,8 @@ message SearchMeetingsRequest {
     }
 
     string query = 1;
-    MeetingCategory category = 4;
-    uint32 last_id = 5;
+    MeetingCategory category = 4 [(buf.validate.field).enum.defined_only = true];
+    optional uint32 last_id = 5;
     uint32 page_size = 6;
 }
 
@@ -95,7 +112,7 @@ message SearchParticipantsResponse {
 
 service ScheduleService {
     rpc CreateMeeting (CreateMeetingRequest) returns (.google.protobuf.Empty);
-    rpc UpdateMeeting (UpdateMeetingRequest) returns (UpdateMeetingResponse);
+    rpc UpdateMeeting (UpdateMeetingRequest) returns (.google.protobuf.Empty);
     rpc SearchMeetings (SearchMeetingsRequest) returns (SearchMeetingsResponse);
     rpc SearchParticipants (SearchParticipantsRequest) returns (SearchParticipantsResponse);
 }
