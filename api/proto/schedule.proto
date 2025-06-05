@@ -6,6 +6,7 @@ option go_package = ".";
 
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 enum MeetingType {
     VIDEO = 0;
@@ -52,10 +53,6 @@ message CreateMeetingRequest {
     ];
 }
 
-message CreateMeetingResponse {
-    Meeting meeting = 1;
-}
-
 message UpdateMeetingRequest {
     uint32 id = 1;
     string title = 2;
@@ -97,7 +94,7 @@ message SearchParticipantsResponse {
 }
 
 service ScheduleService {
-    rpc CreateMeeting (CreateMeetingRequest) returns (CreateMeetingResponse);
+    rpc CreateMeeting (CreateMeetingRequest) returns (.google.protobuf.Empty);
     rpc UpdateMeeting (UpdateMeetingRequest) returns (UpdateMeetingResponse);
     rpc SearchMeetings (SearchMeetingsRequest) returns (SearchMeetingsResponse);
     rpc SearchParticipants (SearchParticipantsRequest) returns (SearchParticipantsResponse);

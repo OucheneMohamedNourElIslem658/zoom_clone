@@ -2,7 +2,6 @@ package interceptors
 
 import (
 	"context"
-	"log"
 	"strings"
 
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/auth"
@@ -44,9 +43,8 @@ func Authorization() grpc.UnaryServerInterceptor {
 						return nil, status.Error(codes.Unauthenticated, "unauthorized")
 					}
 
-					log.Printf("User authenticated: %s", user.Email)
-
-					ctx = context.WithValue(ctx, "user_id", user.ID)
+					userID := user.ID.String()
+					ctx = context.WithValue(ctx, "user_id", userID)
 				}
 			}
 		}

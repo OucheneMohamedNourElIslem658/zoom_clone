@@ -30,7 +30,10 @@ func main()  {
 
 	// Create a new gRPC server
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(interceptors.Authorization()),
+		grpc.ChainUnaryInterceptor(
+			interceptors.Authorization(),
+			interceptors.Validation(),
+		),
 	)
 
 	// Register your gRPC services here
@@ -42,10 +45,4 @@ func main()  {
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve gRPC server: %v", err)
 	}
-}
-
-type Violation struct {
-	Field   string `json:"field"`
-	Code    string `json:"code"`
-	Message string `json:"message"`
 }

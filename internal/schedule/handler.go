@@ -2,10 +2,12 @@ package schedule
 
 import (
 	"context"
+	"log"
 
-	"buf.build/go/protovalidate"
 	pb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
-	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type ScheduleHandler struct {
@@ -19,11 +21,17 @@ func NewScheduleHandler() *ScheduleHandler {
 	}
 }
 
-func (sh *ScheduleHandler) CreateMeeting(ctx context.Context, req *pb.CreateMeetingRequest) (res *pb.CreateMeetingResponse, err error) {
-	vErr := protovalidate.Validate(req).(*protovalidate.ValidationError)
-	if vErr != nil {
-		return nil, utils.ParseValidationError(vErr)
+func (sh *ScheduleHandler) CreateMeeting(ctx context.Context, req *pb.CreateMeetingRequest) (res *emptypb.Empty, err error) {
+	userID, ok := ctx.Value("user_id").(string)
+	log.Println("userID:", userID)
+	if !ok {
+		return nil, status.Errorf(codes.Unauthenticated, "Requester is not authenticated")
 	}
 
-	return nil, nil
+	err = sh.scheduleRepo.CreateMeeting(userID, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
 }

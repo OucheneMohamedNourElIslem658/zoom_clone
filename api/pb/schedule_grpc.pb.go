@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -29,7 +30,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ScheduleServiceClient interface {
-	CreateMeeting(ctx context.Context, in *CreateMeetingRequest, opts ...grpc.CallOption) (*CreateMeetingResponse, error)
+	CreateMeeting(ctx context.Context, in *CreateMeetingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateMeeting(ctx context.Context, in *UpdateMeetingRequest, opts ...grpc.CallOption) (*UpdateMeetingResponse, error)
 	SearchMeetings(ctx context.Context, in *SearchMeetingsRequest, opts ...grpc.CallOption) (*SearchMeetingsResponse, error)
 	SearchParticipants(ctx context.Context, in *SearchParticipantsRequest, opts ...grpc.CallOption) (*SearchParticipantsResponse, error)
@@ -43,9 +44,9 @@ func NewScheduleServiceClient(cc grpc.ClientConnInterface) ScheduleServiceClient
 	return &scheduleServiceClient{cc}
 }
 
-func (c *scheduleServiceClient) CreateMeeting(ctx context.Context, in *CreateMeetingRequest, opts ...grpc.CallOption) (*CreateMeetingResponse, error) {
+func (c *scheduleServiceClient) CreateMeeting(ctx context.Context, in *CreateMeetingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateMeetingResponse)
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, ScheduleService_CreateMeeting_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -87,7 +88,7 @@ func (c *scheduleServiceClient) SearchParticipants(ctx context.Context, in *Sear
 // All implementations must embed UnimplementedScheduleServiceServer
 // for forward compatibility.
 type ScheduleServiceServer interface {
-	CreateMeeting(context.Context, *CreateMeetingRequest) (*CreateMeetingResponse, error)
+	CreateMeeting(context.Context, *CreateMeetingRequest) (*emptypb.Empty, error)
 	UpdateMeeting(context.Context, *UpdateMeetingRequest) (*UpdateMeetingResponse, error)
 	SearchMeetings(context.Context, *SearchMeetingsRequest) (*SearchMeetingsResponse, error)
 	SearchParticipants(context.Context, *SearchParticipantsRequest) (*SearchParticipantsResponse, error)
@@ -101,7 +102,7 @@ type ScheduleServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedScheduleServiceServer struct{}
 
-func (UnimplementedScheduleServiceServer) CreateMeeting(context.Context, *CreateMeetingRequest) (*CreateMeetingResponse, error) {
+func (UnimplementedScheduleServiceServer) CreateMeeting(context.Context, *CreateMeetingRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateMeeting not implemented")
 }
 func (UnimplementedScheduleServiceServer) UpdateMeeting(context.Context, *UpdateMeetingRequest) (*UpdateMeetingResponse, error) {
