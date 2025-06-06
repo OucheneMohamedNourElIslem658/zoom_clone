@@ -67,7 +67,8 @@ message UpdateMeetingRequest {
     optional MeetingType type = 5 [
         (buf.validate.field).enum.defined_only = true
     ];
-    repeated string participant_ids = 6 [
+    bool isParticipantIdsEmpty = 6;
+    repeated string participant_ids = 7 [
         (buf.validate.field).repeated.unique = true,
         (buf.validate.field).repeated.items = {
             string: {
@@ -76,7 +77,7 @@ message UpdateMeetingRequest {
         }
     ];
 
-    optional bool is_cancelled = 7;
+    optional bool is_cancelled = 8;
 }
 
 message UpdateMeetingResponse {

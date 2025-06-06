@@ -2,7 +2,6 @@ package schedule
 
 import (
 	"strings"
-	"time"
 
 	schedulepb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/models"
@@ -83,14 +82,14 @@ func (sr *ScheduleRepo) UpdateMeeting(hostID string, meeting *schedulepb.UpdateM
 		Where("meeting_id = ? AND user_id = ?", existingMeeting.ID, hostID).
 		Select("is_host").
 		Scan(&isCurrentUserHost).Error; err != nil {
-		return status.Error(codes.Internal, "Failed to check host status")
+		return status.Error(codes.Internal, "Requester is not the host of this meeting")
 	}
 
 	if !isCurrentUserHost {
 		return status.Error(codes.PermissionDenied, "You are not the host of this meeting")
 	}
 
-	if !existingMeeting.IsCancelled || existingMeeting.StartTime.After(time.Now()) {
+	if !existingMeeting.IsCancelled {
 		if meeting.Title != nil && existingMeeting.Title != *meeting.Title {
 			existingMeeting.Title = *meeting.Title
 		}
@@ -103,42 +102,41 @@ func (sr *ScheduleRepo) UpdateMeeting(hostID string, meeting *schedulepb.UpdateM
 			existingMeeting.StartTime = meeting.StartTime.AsTime()
 		}
 
-		if existingMeeting.Type != models.MeetingType(meeting.Type.String()) {
+		if meeting.Type != nil && existingMeeting.Type != models.MeetingType(meeting.Type.String()) {
 			existingMeeting.Type = models.MeetingType(meeting.Type.String())
 		}
 
-		if meeting.IsCancelled != nil && !*meeting.IsCancelled {
-			existingMeeting.IsCancelled = true
+		if meeting.ParticipantIds != nil || meeting.IsParticipantIdsEmpty {
+			newParticipants := make([]models.MeetParticipant, 0, len(meeting.ParticipantIds))
+			for _, participantId := range meeting.ParticipantIds {
+				if participantId != hostID {
+					newParticipants = append(newParticipants, models.MeetParticipant{
+						UserID:    participantId,
+						MeetingID: existingMeeting.ID,
+						IsHost:    false,
+					})
+				}
+			}
+
+			if err := sr.database.
+				Where("meeting_id = ? AND is_host = ?", existingMeeting.ID, false).
+				Delete(&models.MeetParticipant{}).Error; err != nil {
+				return status.Error(codes.Internal, "Failed to remove old participants")
+			}
+
+			if len(newParticipants) > 0 {
+				if err := sr.database.Create(&newParticipants).Error; err != nil {
+					return status.Error(codes.Internal, "Failed to add new participants")
+				}
+			}
 		}
+
 	} else if existingMeeting.IsCancelled {
 		return status.Error(codes.FailedPrecondition, "Cannot update a cancelled meeting")
-	} else {
-		return status.Error(codes.FailedPrecondition, "Cannot update a meeting that has already started")
 	}
 
-	if meeting.ParticipantIds != nil {
-		newParticipants := make([]models.MeetParticipant, 0, len(meeting.ParticipantIds))
-		for _, participantId := range meeting.ParticipantIds {
-			if participantId != hostID {
-				newParticipants = append(newParticipants, models.MeetParticipant{
-					UserID:    participantId,
-					MeetingID: existingMeeting.ID,
-					IsHost:    false,
-				})
-			}
-		}
-
-		if err := sr.database.
-			Where("meeting_id = ? AND is_host = ?", existingMeeting.ID, false).
-			Delete(&models.MeetParticipant{}).Error; err != nil {
-			return status.Error(codes.Internal, "Failed to remove old participants")
-		}
-
-		if len(newParticipants) > 0 {
-			if err := sr.database.Create(&newParticipants).Error; err != nil {
-				return status.Error(codes.Internal, "Failed to add new participants")
-			}
-		}
+	if meeting.IsCancelled != nil && !existingMeeting.IsCancelled {
+		existingMeeting.IsCancelled = true
 	}
 
 	if err := sr.database.Save(existingMeeting).Error; err != nil {

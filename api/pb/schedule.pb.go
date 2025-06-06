@@ -372,16 +372,17 @@ func (x *CreateMeetingRequest) GetParticipantIds() []string {
 }
 
 type UpdateMeetingRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title          *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`
-	Description    *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
-	StartTime      *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3,oneof" json:"start_time,omitempty"`
-	Type           *MeetingType           `protobuf:"varint,5,opt,name=type,proto3,enum=schedule.MeetingType,oneof" json:"type,omitempty"`
-	ParticipantIds []string               `protobuf:"bytes,6,rep,name=participant_ids,json=participantIds,proto3" json:"participant_ids,omitempty"`
-	IsCancelled    *bool                  `protobuf:"varint,7,opt,name=is_cancelled,json=isCancelled,proto3,oneof" json:"is_cancelled,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	Id                    uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title                 *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`
+	Description           *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	StartTime             *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3,oneof" json:"start_time,omitempty"`
+	Type                  *MeetingType           `protobuf:"varint,5,opt,name=type,proto3,enum=schedule.MeetingType,oneof" json:"type,omitempty"`
+	IsParticipantIdsEmpty bool                   `protobuf:"varint,6,opt,name=isParticipantIdsEmpty,proto3" json:"isParticipantIdsEmpty,omitempty"`
+	ParticipantIds        []string               `protobuf:"bytes,7,rep,name=participant_ids,json=participantIds,proto3" json:"participant_ids,omitempty"`
+	IsCancelled           *bool                  `protobuf:"varint,8,opt,name=is_cancelled,json=isCancelled,proto3,oneof" json:"is_cancelled,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *UpdateMeetingRequest) Reset() {
@@ -447,6 +448,13 @@ func (x *UpdateMeetingRequest) GetType() MeetingType {
 		return *x.Type
 	}
 	return MeetingType_VIDEO
+}
+
+func (x *UpdateMeetingRequest) GetIsParticipantIdsEmpty() bool {
+	if x != nil {
+		return x.IsParticipantIdsEmpty
+	}
+	return false
 }
 
 func (x *UpdateMeetingRequest) GetParticipantIds() []string {
@@ -751,16 +759,17 @@ const file_schedule_proto_rawDesc = "" +
 	"\n" +
 	"start_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\v\xbaH\b\xc8\x01\x01\xb2\x01\x02@\x01R\tstartTime\x123\n" +
 	"\x04type\x18\x04 \x01(\x0e2\x15.schedule.MeetingTypeB\b\xbaH\x05\x82\x01\x02\x10\x01R\x04type\x12:\n" +
-	"\x0fparticipant_ids\x18\x05 \x03(\tB\x11\xbaH\x0e\x92\x01\v\b\x01\x18\x01\"\x05r\x03\xb0\x01\x01R\x0eparticipantIds\"\xab\x03\n" +
+	"\x0fparticipant_ids\x18\x05 \x03(\tB\x11\xbaH\x0e\x92\x01\v\b\x01\x18\x01\"\x05r\x03\xb0\x01\x01R\x0eparticipantIds\"\xe1\x03\n" +
 	"\x14UpdateMeetingRequest\x12\x16\n" +
 	"\x02id\x18\x01 \x01(\rB\x06\xbaH\x03\xc8\x01\x01R\x02id\x12\"\n" +
 	"\x05title\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x00R\x05title\x88\x01\x01\x12.\n" +
 	"\vdescription\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01H\x01R\vdescription\x88\x01\x01\x12H\n" +
 	"\n" +
 	"start_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampB\b\xbaH\x05\xb2\x01\x02@\x01H\x02R\tstartTime\x88\x01\x01\x128\n" +
-	"\x04type\x18\x05 \x01(\x0e2\x15.schedule.MeetingTypeB\b\xbaH\x05\x82\x01\x02\x10\x01H\x03R\x04type\x88\x01\x01\x128\n" +
-	"\x0fparticipant_ids\x18\x06 \x03(\tB\x0f\xbaH\f\x92\x01\t\x18\x01\"\x05r\x03\xb0\x01\x01R\x0eparticipantIds\x12&\n" +
-	"\fis_cancelled\x18\a \x01(\bH\x04R\visCancelled\x88\x01\x01B\b\n" +
+	"\x04type\x18\x05 \x01(\x0e2\x15.schedule.MeetingTypeB\b\xbaH\x05\x82\x01\x02\x10\x01H\x03R\x04type\x88\x01\x01\x124\n" +
+	"\x15isParticipantIdsEmpty\x18\x06 \x01(\bR\x15isParticipantIdsEmpty\x128\n" +
+	"\x0fparticipant_ids\x18\a \x03(\tB\x0f\xbaH\f\x92\x01\t\x18\x01\"\x05r\x03\xb0\x01\x01R\x0eparticipantIds\x12&\n" +
+	"\fis_cancelled\x18\b \x01(\bH\x04R\visCancelled\x88\x01\x01B\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\r\n" +
 	"\v_start_timeB\a\n" +
