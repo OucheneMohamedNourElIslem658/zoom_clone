@@ -1,0 +1,11 @@
+version: v1
+plugins:
+  - plugin: ts
+    out: src/api/pb
+    opt:
+      - target=ts
+  - plugin: grpc-web
+    out: src/api/pb
+    opt:
+      - import_style=typescript
+      - mode=grpcwebtext

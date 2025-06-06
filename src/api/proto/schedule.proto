@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+package schedule;
+
+option go_package = ".";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+enum MeetingType {
+    VIDEO = 0;
+    AUDIO = 1;
+}
+
+message Meeting {
+    uint32 id = 1;
+    string title = 2;
+    string description = 3;
+    MeetingType type = 4;
+    google.protobuf.Timestamp start_time = 5;
+    uint32 participants_count = 6;
+    MeetParticipant host = 7;
+    bool is_cancelled = 8;
+    repeated MeetParticipant first_three_participants = 9;
+}
+
+message MeetParticipant {
+    string id = 2;
+    string avatar_url = 3;
+    string name = 4;
+    string email = 5;
+}
+
+message CreateMeetingRequest {
+    string title = 1 [(buf.validate.field).required = true];
+    string description = 2;
+    google.protobuf.Timestamp start_time = 3 [
+        (buf.validate.field).required = true,
+        (buf.validate.field).timestamp.gt_now = true
+    ];
+    MeetingType type = 4 [
+        (buf.validate.field).enum.defined_only = true
+    ];
+    repeated string participant_ids = 5 [
+        (buf.validate.field).repeated.min_items = 1,
+        (buf.validate.field).repeated.unique = true,
+        (buf.validate.field).repeated.items = {
+            string: {
+                uuid: true,
+            }
+        }
+    ];
+}
+
+message UpdateMeetingRequest {
+    uint32 id = 1 [(buf.validate.field).required = true];
+    optional string title = 2 [
+        (buf.validate.field).string.min_len = 1
+    ];
+    optional string description = 3 [
+        (buf.validate.field).string.min_len = 1
+    ];
+    optional google.protobuf.Timestamp start_time = 4 [
+        (buf.validate.field).timestamp.gt_now = true
+    ];
+    optional MeetingType type = 5 [
+        (buf.validate.field).enum.defined_only = true
+    ];
+    bool isParticipantIdsEmpty = 6;
+    repeated string participant_ids = 7 [
+        (buf.validate.field).repeated.unique = true,
+        (buf.validate.field).repeated.items = {
+            string: {
+                uuid: true,
+            }
+        }
+    ];
+
+    optional bool is_cancelled = 8;
+}
+
+message UpdateMeetingResponse {
+    Meeting meeting = 1;
+}
+
+message SearchMeetingsRequest {
+    enum MeetingCategory {
+        ALL = 0;
+        PASSED = 1;
+        UPCOMING = 2;
+    }
+
+    string query = 1;
+    MeetingCategory category = 4 [(buf.validate.field).enum.defined_only = true];
+    optional uint32 last_id = 5;
+    uint32 page_size = 6;
+}
+
+message SearchMeetingsResponse {
+    repeated Meeting meetings = 1;
+}
+
+message SearchParticipantsRequest {
+    string emailQuery = 1;
+    optional string last_id = 2;
+    uint32 page_size = 3;
+}
+
+message SearchParticipantsResponse {
+    repeated MeetParticipant participants = 1;
+}
+
+service ScheduleService {
+    rpc CreateMeeting (CreateMeetingRequest) returns (.google.protobuf.Empty);
+    rpc UpdateMeeting (UpdateMeetingRequest) returns (.google.protobuf.Empty);
+    rpc SearchMeetings (SearchMeetingsRequest) returns (SearchMeetingsResponse);
+    rpc SearchParticipants (SearchParticipantsRequest) returns (SearchParticipantsResponse);
+}

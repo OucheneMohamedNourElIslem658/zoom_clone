@@ -41,7 +41,6 @@ const CreateMeetingDialog = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        // Handle form submission
         onOpenChange(false)
     }
 
