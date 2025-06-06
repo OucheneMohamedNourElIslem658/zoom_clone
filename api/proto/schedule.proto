@@ -102,8 +102,8 @@ message SearchMeetingsResponse {
 }
 
 message SearchParticipantsRequest {
-    string query = 1;
-    uint32 last_id = 2;
+    string emailQuery = 1;
+    optional string last_id = 2;
     uint32 page_size = 3;
 }
 

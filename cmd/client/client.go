@@ -32,11 +32,9 @@ func main() {
 		"authorization": "Bearer " + token,
 	})
 	ctx = metadata.NewOutgoingContext(ctx, md)
-	title := "Updated Meeting Titlo"
-	resp, err := client.UpdateMeeting(ctx, &pb.UpdateMeetingRequest{
-		Id: 3,
-		Title: &title,
-		IsParticipantIdsEmpty: true,
+	title := "mooh"
+	resp, err := client.SearchParticipants(ctx, &pb.SearchParticipantsRequest{
+		EmailQuery: title,
 	})
 	if err != nil {
 		log.Println(err)

@@ -65,3 +65,17 @@ func (sh *ScheduleHandler) SearchMeetings(ctx context.Context, req *pb.SearchMee
 
 	return result, nil
 }
+
+func (sh *ScheduleHandler) SearchParticipants(ctx context.Context, req *pb.SearchParticipantsRequest) (*pb.SearchParticipantsResponse, error) {
+	userID, ok := ctx.Value("user_id").(string)
+	if !ok {
+		return nil, status.Errorf(codes.Unauthenticated, "Requester is not authenticated")
+	}
+
+	result, err := sh.scheduleRepo.GetAllUsers(userID, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

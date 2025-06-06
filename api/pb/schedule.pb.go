@@ -629,8 +629,8 @@ func (x *SearchMeetingsResponse) GetMeetings() []*Meeting {
 
 type SearchParticipantsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Query         string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
-	LastId        uint32                 `protobuf:"varint,2,opt,name=last_id,json=lastId,proto3" json:"last_id,omitempty"`
+	EmailQuery    string                 `protobuf:"bytes,1,opt,name=emailQuery,proto3" json:"emailQuery,omitempty"`
+	LastId        *string                `protobuf:"bytes,2,opt,name=last_id,json=lastId,proto3,oneof" json:"last_id,omitempty"`
 	PageSize      uint32                 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -666,18 +666,18 @@ func (*SearchParticipantsRequest) Descriptor() ([]byte, []int) {
 	return file_schedule_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *SearchParticipantsRequest) GetQuery() string {
+func (x *SearchParticipantsRequest) GetEmailQuery() string {
 	if x != nil {
-		return x.Query
+		return x.EmailQuery
 	}
 	return ""
 }
 
-func (x *SearchParticipantsRequest) GetLastId() uint32 {
-	if x != nil {
-		return x.LastId
+func (x *SearchParticipantsRequest) GetLastId() string {
+	if x != nil && x.LastId != nil {
+		return *x.LastId
 	}
-	return 0
+	return ""
 }
 
 func (x *SearchParticipantsRequest) GetPageSize() uint32 {
@@ -790,11 +790,15 @@ const file_schedule_proto_rawDesc = "" +
 	"\n" +
 	"\b_last_id\"G\n" +
 	"\x16SearchMeetingsResponse\x12-\n" +
-	"\bmeetings\x18\x01 \x03(\v2\x11.schedule.MeetingR\bmeetings\"g\n" +
-	"\x19SearchParticipantsRequest\x12\x14\n" +
-	"\x05query\x18\x01 \x01(\tR\x05query\x12\x17\n" +
-	"\alast_id\x18\x02 \x01(\rR\x06lastId\x12\x1b\n" +
-	"\tpage_size\x18\x03 \x01(\rR\bpageSize\"[\n" +
+	"\bmeetings\x18\x01 \x03(\v2\x11.schedule.MeetingR\bmeetings\"\x82\x01\n" +
+	"\x19SearchParticipantsRequest\x12\x1e\n" +
+	"\n" +
+	"emailQuery\x18\x01 \x01(\tR\n" +
+	"emailQuery\x12\x1c\n" +
+	"\alast_id\x18\x02 \x01(\tH\x00R\x06lastId\x88\x01\x01\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\rR\bpageSizeB\n" +
+	"\n" +
+	"\b_last_id\"[\n" +
 	"\x1aSearchParticipantsResponse\x12=\n" +
 	"\fparticipants\x18\x01 \x03(\v2\x19.schedule.MeetParticipantR\fparticipants*#\n" +
 	"\vMeetingType\x12\t\n" +
@@ -870,6 +874,7 @@ func file_schedule_proto_init() {
 	}
 	file_schedule_proto_msgTypes[3].OneofWrappers = []any{}
 	file_schedule_proto_msgTypes[5].OneofWrappers = []any{}
+	file_schedule_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

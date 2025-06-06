@@ -228,6 +228,45 @@ func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeet
 	}, nil
 }
 
+func (sr *ScheduleRepo) GetAllUsers(userID string, req *schedulepb.SearchParticipantsRequest) (*schedulepb.SearchParticipantsResponse, error) {
+	var users []models.User
+
+	db := sr.database.Model(&models.User{}).
+		Where("id != ?", userID)
+
+	if req.EmailQuery != "" {
+		query := "%" + strings.ToLower(req.EmailQuery) + "%"
+		db = db.Where("LOWER(email) LIKE ?", query)
+	}
+
+	// Optional pagination
+	if req.LastId != nil {
+		db = db.Where("meetings.id > ?", *req.LastId)
+	}
+	if req.PageSize > 0 {
+		db = db.Limit(int(req.PageSize))
+	}
+
+	// Final query
+	if err := db.Find(&users).Error; err != nil {
+		return nil, status.Error(codes.Internal, "Failed to fetch users")
+	}
+
+	// Transform into protobuf response
+	participants := make([]*schedulepb.MeetParticipant, 0, len(users))
+	for _, u := range users {
+		participants = append(participants, &schedulepb.MeetParticipant{
+			Id: u.ID,
+			Email:     u.Email,
+			Name:      u.RawUserMetaData.Name,
+			AvatarUrl: u.RawUserMetaData.AvatarURL,
+		})
+	}
+
+	return &schedulepb.SearchParticipantsResponse{
+		Participants: participants,
+	}, nil
+}
 
 // func (sr *ScheduleRepo) GetUsers(userID string) ([]models.User, error) {
 // }
