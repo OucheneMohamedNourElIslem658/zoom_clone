@@ -31,6 +31,7 @@ func main()  {
 	// Create a new gRPC server
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
+			interceptors.Logger(),
 			interceptors.Authorization(),
 			interceptors.Validation(),
 		),
