@@ -20,6 +20,8 @@ import { Separator } from "@/components/ui/separator"
 import { Calendar, Clock, Users, Video, MapPin, FileText, Plus, X } from "lucide-react"
 import { useCallback } from "react"
 import { DialogTrigger } from "@/components/ui/dialog"
+import { createMeeting } from "@/services/schedule"
+// import { createMeeting } from "@/services/schedule" // Adjust the import path as necessary
 
 const CreateMeetingDialog = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -39,9 +41,14 @@ const CreateMeetingDialog = () => {
         setParticipants(participants.filter((p) => p !== participant))
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        onOpenChange(false)
+        await createMeeting({
+            title: "test",
+            description: "desc",
+            startTime: new Date(),
+            participantsIDs: []
+        })
     }
 
     return (

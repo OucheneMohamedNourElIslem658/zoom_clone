@@ -1,11 +1,13 @@
+# buf.gen.yaml
 version: v1
 plugins:
-  - plugin: ts
+  - name: ts_proto
+    # Use the absolute path to protoc-gen-ts_proto.cmd
+    # Adjust path if buf.gen.yaml is not in the project root.
+    path: "M:\\Documents\\typescript\\zoom_clone\\node_modules\\.bin\\protoc-gen-ts_proto.cmd"
     out: src/api/pb
+    # outputServices should typically be a single value for ts-proto.
+    # 'nice-grpc' often includes sufficient definitions for the client.
     opt:
-      - target=ts
-  - plugin: grpc-web
-    out: src/api/pb
-    opt:
-      - import_style=typescript
-      - mode=grpcwebtext
+      - outputServices=nice-grpc,outputServices=generic-definitions
+      - useExactTypes=false

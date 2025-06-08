@@ -2,9 +2,6 @@ syntax = "proto3";
 
 package schedule;
 
-option go_package = ".";
-
-import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
@@ -33,49 +30,21 @@ message MeetParticipant {
 }
 
 message CreateMeetingRequest {
-    string title = 1 [(buf.validate.field).required = true];
+    string title = 1;
     string description = 2;
-    google.protobuf.Timestamp start_time = 3 [
-        (buf.validate.field).required = true,
-        (buf.validate.field).timestamp.gt_now = true
-    ];
-    MeetingType type = 4 [
-        (buf.validate.field).enum.defined_only = true
-    ];
-    repeated string participant_ids = 5 [
-        (buf.validate.field).repeated.min_items = 1,
-        (buf.validate.field).repeated.unique = true,
-        (buf.validate.field).repeated.items = {
-            string: {
-                uuid: true,
-            }
-        }
-    ];
+    google.protobuf.Timestamp start_time = 3;
+    MeetingType type = 4;
+    repeated string participant_ids = 5;
 }
 
 message UpdateMeetingRequest {
-    uint32 id = 1 [(buf.validate.field).required = true];
-    optional string title = 2 [
-        (buf.validate.field).string.min_len = 1
-    ];
-    optional string description = 3 [
-        (buf.validate.field).string.min_len = 1
-    ];
-    optional google.protobuf.Timestamp start_time = 4 [
-        (buf.validate.field).timestamp.gt_now = true
-    ];
-    optional MeetingType type = 5 [
-        (buf.validate.field).enum.defined_only = true
-    ];
+    uint32 id = 1;
+    optional string title = 2;
+    optional string description = 3;
+    optional google.protobuf.Timestamp start_time = 4;
+    optional MeetingType type = 5;
     bool isParticipantIdsEmpty = 6;
-    repeated string participant_ids = 7 [
-        (buf.validate.field).repeated.unique = true,
-        (buf.validate.field).repeated.items = {
-            string: {
-                uuid: true,
-            }
-        }
-    ];
+    repeated string participant_ids = 7;
 
     optional bool is_cancelled = 8;
 }
@@ -92,7 +61,7 @@ message SearchMeetingsRequest {
     }
 
     string query = 1;
-    MeetingCategory category = 4 [(buf.validate.field).enum.defined_only = true];
+    MeetingCategory category = 4;
     optional uint32 last_id = 5;
     uint32 page_size = 6;
 }

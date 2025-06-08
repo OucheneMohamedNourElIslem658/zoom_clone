@@ -1,6 +1,11 @@
-import { ScheduleServiceClient } from "@/api/pb/ScheduleServiceClientPb";
+import { ScheduleServiceDefinition } from '@/api/pb/schedule';
+import {createChannel, createClient} from 'nice-grpc-web';
 
-const serverURL = import.meta.env.VITE_MEETINGS_SERVER_URL
-const client = new ScheduleServiceClient(serverURL);
+const channel = createChannel('http://localhost:8080');
+
+const client = createClient(
+    ScheduleServiceDefinition,
+    channel,
+);
 
 export default client
