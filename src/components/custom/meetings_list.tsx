@@ -6,7 +6,6 @@ import { Meeting, SearchMeetingsRequest_MeetingCategory } from '@/api/pb/schedul
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { Button } from '../ui/button';
 import { getMeetings } from '@/services/schedule'
-import { toast } from 'sonner';
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString("en-US", {
