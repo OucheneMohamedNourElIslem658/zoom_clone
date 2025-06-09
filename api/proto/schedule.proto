@@ -43,7 +43,6 @@ message CreateMeetingRequest {
         (buf.validate.field).enum.defined_only = true
     ];
     repeated string participant_ids = 5 [
-        (buf.validate.field).repeated.min_items = 1,
         (buf.validate.field).repeated.unique = true,
         (buf.validate.field).repeated.items = {
             string: {

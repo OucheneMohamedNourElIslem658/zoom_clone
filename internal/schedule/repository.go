@@ -36,33 +36,35 @@ func (sr *ScheduleRepo) CreateMeeting(hostID string, meeting *schedulepb.CreateM
 		return err
 	}
 
-	participants := make([]models.MeetParticipant, 0, len(meeting.ParticipantIds))
-	for _, participantId := range meeting.ParticipantIds {
-		participants = append(participants, models.MeetParticipant{
-			UserID:    participantId,
-			MeetingID: createdMeeting.ID,
-			IsHost:    false,
-		})
-	}
-
-	// add the host as a participant
-	participants = append(participants, models.MeetParticipant{
-		UserID:    hostID,
-		MeetingID: createdMeeting.ID,
-		IsHost:    true,
-	})
-
-	// remove host from participant list if they are already included
-	for i, participant := range participants {
-		if participant.UserID == hostID {
-			participants = append(participants[:i], participants[i+1:]...)
-			break
+	if meeting.ParticipantIds != nil {
+		participants := make([]models.MeetParticipant, 0, len(meeting.ParticipantIds))
+		for _, participantId := range meeting.ParticipantIds {
+			participants = append(participants, models.MeetParticipant{
+				UserID:    participantId,
+				MeetingID: createdMeeting.ID,
+				IsHost:    false,
+			})
 		}
-	}
 
-	if err := sr.database.Create(&participants).Error; err != nil {
-		err = status.Error(codes.Internal, "Failed to create participants")
-		return err
+		// add the host as a participant
+		participants = append(participants, models.MeetParticipant{
+			UserID:    hostID,
+			MeetingID: createdMeeting.ID,
+			IsHost:    true,
+		})
+
+		// remove host from participant list if they are already included
+		for i, participant := range participants {
+			if participant.UserID == hostID {
+				participants = append(participants[:i], participants[i+1:]...)
+				break
+			}
+		}
+
+		if err := sr.database.Create(&participants).Error; err != nil {
+			err = status.Error(codes.Internal, "Failed to create participants")
+			return err
+		}
 	}
 
 	return nil
