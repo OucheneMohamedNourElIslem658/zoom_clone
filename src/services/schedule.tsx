@@ -1,5 +1,9 @@
 import client from "@/commun/meetings";
 import { CreateMeetingRequest, MeetingType } from "@/api/pb/schedule";
+import { RichClientError } from "nice-grpc-error-details";
+import type { Empty } from "@/api/pb/google/protobuf/empty";
+import { Metadata } from "nice-grpc-web";
+import { getAccessToken, getCurrentUser } from "./auth";
 
 interface CreateMeetingParams {
     title: string;
@@ -15,22 +19,37 @@ export const createMeeting = async ({
     startTime,
     participantsIDs,
     type
-} : CreateMeetingParams) => {
+}: CreateMeetingParams): Promise<[ Empty | null, RichClientError | null]> => {
     try {
         const request = CreateMeetingRequest.create({
-        title: title,
-        description: description,
-        startTime: startTime,
-        type: type,
-        participantIds: participantsIDs || []
-    });
+            title: title,
+            description: description,
+            startTime: startTime,
+            type: type,
+            participantIds: participantsIDs || []
+        });
 
-    const response = await client.createMeeting(request);
+        const accessToken = await getAccessToken();
+        if (!accessToken) {
+            throw new Error("Access token is not available. Please log in.");
+        }
+        
+        let metadata: any = undefined;
+        if (accessToken) {
+            metadata = new Metadata();
+            metadata.set("Authorization", `Bearer ${accessToken}`);
+        }
 
-    console.log("Meeting created successfully:", response);
-    
+        const response = await client.createMeeting(request, {
+            metadata: metadata
+        });
+
+        return [response, null];
     } catch (error) {
-        console.log(error)
+        if (error instanceof RichClientError) {
+            return [null, error];
+        }
+        throw error;
     }
 };
 

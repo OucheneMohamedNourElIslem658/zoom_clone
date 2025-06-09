@@ -18,6 +18,15 @@ const getCurrentUser = async () => {
     return data.session?.user;
 }
 
+const getAccessToken = async () => {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+        console.error("Error fetching session:", error);
+        return null;
+    }
+    return data.session?.access_token;
+}
+
 const logout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -27,4 +36,4 @@ const logout = async () => {
     window.location.href = '/auth';
 }
  
-export { signInWithOAuth, getCurrentUser, logout };
+export { signInWithOAuth, getCurrentUser, getAccessToken, logout };

@@ -14,19 +14,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Calendar, Clock, Users, Video, MapPin, FileText, Plus, X } from "lucide-react"
+import { Calendar, Clock, Users, Video, MapPin, FileText, Plus, X, Dot } from "lucide-react"
 import { useCallback } from "react"
 import { DialogTrigger } from "@/components/ui/dialog"
 import { createMeeting } from "@/services/schedule"
+import { toast } from "sonner"
+import type { MeetingType } from "@/api/pb/schedule"
+import { BadRequest, BadRequest_FieldViolation } from "nice-grpc-error-details"
 // import { createMeeting } from "@/services/schedule" // Adjust the import path as necessary
 
 const CreateMeetingDialog = () => {
     const [isOpen, setIsOpen] = useState(false)
     const [participants, setParticipants] = useState<string[]>([])
     const [newParticipant, setNewParticipant] = useState("")
+    const [err, setError] = useState<string | null>(null)
+    const [validationViolations, setValidationViolations] = useState<string[]>([])
 
     const onOpenChange = useCallback((open: boolean) => setIsOpen(open), [])
 
@@ -43,12 +48,45 @@ const CreateMeetingDialog = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        await createMeeting({
-            title: "test",
-            description: "desc",
-            startTime: new Date(),
-            participantsIDs: []
+        const formData = new FormData(e.currentTarget as HTMLFormElement)
+        const title = formData.get("title") as string
+        const description = formData.get("description") as string
+        const startTime = new Date(formData.get("startTime") as string)
+        
+        const participantsIDs = participants.map((p) => p.trim()).filter((p) => p)
+        const type : MeetingType = formData.get("type") as unknown as MeetingType
+        const [response, error] = await createMeeting({
+            title: title,
+            description: description,
+            startTime: startTime,
+            participantsIDs: participantsIDs,
+            type: type
         })
+        
+        if (error) {
+            const violations: string[] = []
+            for (const violation of error.extra) {
+                if (violation.$type === BadRequest.$type) {
+                    const fieldViolations = (violation as BadRequest).fieldViolations || []
+                    for (const fieldViolation of fieldViolations) {
+                        if (fieldViolation.$type === BadRequest_FieldViolation.$type) {
+                            violations.push(`${fieldViolation.field}: ${fieldViolation.description}`)
+                        }
+                    }
+                }
+
+                setValidationViolations(violations)
+            }
+            setError(error.details)
+            return
+        }
+
+        if (response) {
+            toast.success("Meeting created successfully!")
+            setIsOpen(false)
+            setParticipants([])
+            setNewParticipant("")
+        }
     }
 
     return (
@@ -85,7 +123,7 @@ const CreateMeetingDialog = () => {
                                         <Label htmlFor="title" className="text-sm font-medium">
                                             Meeting Title *
                                         </Label>
-                                        <Input id="title" placeholder="Enter a descriptive meeting title" className="h-11" required />
+                                        <Input id="title" name="title" placeholder="Enter a descriptive meeting title" className="h-11" required />
                                     </div>
 
                                     <div className="space-y-2">
@@ -96,6 +134,7 @@ const CreateMeetingDialog = () => {
                                             id="description"
                                             placeholder="Add meeting agenda, objectives, or any relevant details..."
                                             className="min-h-[80px] resize-none"
+                                            name="description"
                                         />
                                     </div>
                                 </div>
@@ -118,7 +157,7 @@ const CreateMeetingDialog = () => {
                                             <Calendar className="w-3 h-3 white" />
                                             Date *
                                         </Label>
-                                        <Input type="date" className="h-11" required />
+                                        <Input type="date" name="startTime" className="h-11" required />
                                     </div>
 
                                     <div className="space-y-2">
@@ -238,6 +277,27 @@ const CreateMeetingDialog = () => {
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Error Card */}
+                    {err && (
+                        <Card className="border-destructive bg-destructive/10">
+                            {err && <CardHeader>
+                                <CardTitle className="text-destructive"> {err} </CardTitle>
+                                <CardAction>
+                                    <X className="w-4 h-4 cursor-pointer" onClick={() => setError(null)} />
+                                </CardAction>
+                            </CardHeader>}
+                            {validationViolations.length > 0 && <CardContent>
+                                <ul className="mt-2 space-y-1">
+                                    {validationViolations.map((violation, index) => (
+                                        <li key={index} className="text-sm text-destructive flex items-center gap-1">
+                                            <Dot /> {violation}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </CardContent>}
+                        </Card>
+                    )}
 
                     <Separator />
 
