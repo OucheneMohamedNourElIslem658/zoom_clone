@@ -1,5 +1,5 @@
 import client from "@/commun/meetings";
-import { CreateMeetingRequest, MeetingType } from "@/api/pb/schedule";
+import { CreateMeetingRequest, MeetingType, SearchParticipantsRequest } from "@/api/pb/schedule";
 import { RichClientError } from "nice-grpc-error-details";
 import type { Empty } from "@/api/pb/google/protobuf/empty";
 import { Metadata } from "nice-grpc-web";
@@ -95,16 +95,34 @@ export const createMeeting = async ({
 //     return reponse.getMeetingsList()
 // }
 
-// const getUsers = async (
-//     emailQuery : string,
-//     lastID : string,
-//     pageSize : number = 10
-// ) => {
-//     const request = new SearchParticipantsRequest()
-//     request.setEmailquery(emailQuery)
-//     request.setLastId(lastID)
-//     request.setPageSize(pageSize)
+interface GetUsersParams {
+    emailQuery: string;
+    lastID?: string;
+    pageSize?: number;
+}
+
+export const getUsers = async ({
+    emailQuery, lastID, pageSize
+} : GetUsersParams) => {
+    const request = SearchParticipantsRequest.create({
+        emailQuery: emailQuery,
+        lastId: lastID,
+        pageSize: pageSize
+    })
+
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+        throw new Error("Access token is not available. Please log in.");
+    }
     
-//     const reponse = await client.searchParticipants(request)
-//     return reponse.getParticipantsList()
-// }
+    let metadata: any = undefined;
+    if (accessToken) {
+        metadata = new Metadata();
+        metadata.set("Authorization", `Bearer ${accessToken}`);
+    }
+    
+    const reponse = await client.searchParticipants(request, {
+        metadata: metadata
+    })
+    return reponse.participants
+}

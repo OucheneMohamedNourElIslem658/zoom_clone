@@ -15,7 +15,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Calendar, Users, Video, MapPin, FileText, Plus, X, Dot } from "lucide-react"
 import { useCallback } from "react"
@@ -25,34 +24,22 @@ import { toast } from "sonner"
 import type { MeetingType } from "@/api/pb/schedule"
 import { BadRequest, BadRequest_FieldViolation } from "nice-grpc-error-details"
 import { TimePicker } from "./time_picker"
+import PaginatedUsersSearchCard from "./paginated_users_search_card"
 
 const CreateMeetingDialog = () => {
     const [isOpen, setIsOpen] = useState(false)
-    const [participants, setParticipants] = useState<string[]>([])
-    const [newParticipant, setNewParticipant] = useState("")
     const [err, setError] = useState<string | null>(null)
     const [validationViolations, setValidationViolations] = useState<string[]>([])
+    const [selectedParticipantsIDs, setSelectedParticipantsIDs] = useState<string[]>([])
 
     const onOpenChange = useCallback((open: boolean) => {
         setIsOpen(open)
         if (!open) {
-            setParticipants([])
-            setNewParticipant("")
+            setSelectedParticipantsIDs([])
             setError(null)
             setValidationViolations([])
         }
     }, [])
-
-    const addParticipant = () => {
-        if (newParticipant.trim() && !participants.includes(newParticipant.trim())) {
-            setParticipants([...participants, newParticipant.trim()])
-            setNewParticipant("")
-        }
-    }
-
-    const removeParticipant = (participant: string) => {
-        setParticipants(participants.filter((p) => p !== participant))
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -71,13 +58,12 @@ const CreateMeetingDialog = () => {
         startTime = new Date(Date.UTC(year, month - 1, day, hour, minute))
         startTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000)
 
-        const participantsIDs = participants.map((p) => p.trim()).filter((p) => p)
         const type : MeetingType = formData.get("type") as unknown as MeetingType
         const [response, error] = await createMeeting({
             title: title,
             description: description,
             startTime: startTime,
-            participantsIDs: participantsIDs,
+            participantsIDs: selectedParticipantsIDs,
             type: type
         })
         
@@ -102,8 +88,7 @@ const CreateMeetingDialog = () => {
         if (response) {
             toast.success("Meeting created successfully!")
             setIsOpen(false)
-            setParticipants([])
-            setNewParticipant("")
+            setSelectedParticipantsIDs([])
         }
     }
 
@@ -207,58 +192,12 @@ const CreateMeetingDialog = () => {
                     </Card>
 
                     {/* Participants Section */}
-                    <Card>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Users className="w-4 h-4 text-muted-foreground" />
-                                    <h3 className="font-medium">Participants</h3>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <div className="flex gap-2">
-                                        <Input
-                                            placeholder="Enter email address or name"
-                                            value={newParticipant}
-                                            onChange={(e) => setNewParticipant(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === "Enter") {
-                                                    e.preventDefault()
-                                                    addParticipant()
-                                                }
-                                            }}
-                                            className="flex-1 h-11"
-                                        />
-                                        <Button type="button" onClick={addParticipant} size="sm" className="h-11 px-4">
-                                            <Plus className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-
-                                    {participants.length > 0 && (
-                                        <div className="space-y-2">
-                                            <Label className="text-sm font-medium">Invited Participants ({participants.length})</Label>
-                                            <div className="flex flex-wrap gap-2">
-                                                {participants.map((participant, index) => (
-                                                    <Badge key={index} variant="secondary" className="flex items-center gap-1 px-3 py-1">
-                                                        {participant}
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                                                            onClick={() => removeParticipant(participant)}
-                                                        >
-                                                            <X className="w-3 h-3" />
-                                                        </Button>
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <PaginatedUsersSearchCard
+                        onParticipantsChange={(users) => {
+                            const selectedParticipantsIDs = users.map((user) => user.id)
+                            setSelectedParticipantsIDs(selectedParticipantsIDs)
+                        }}
+                    />
 
                     {/* Error Card */}
                     {err && (

@@ -44,7 +44,7 @@ export function AppBar() {
         if (!user) {
           return (
             <Link to="/auth" className="flex items-center gap-2 pr-2">
-          <Button variant="outline" className="h-9">Sign In</Button>
+              <Button variant="outline" className="h-9">Sign In</Button>
             </Link>
           )
         }
@@ -54,8 +54,8 @@ export function AppBar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 flex items-center gap-2 px-2">
               <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.user_metadata.avatar_url || "/placeholder.svg?height=32&width=32"} alt={user?.id} />
-            <AvatarFallback>{user?.user_metadata.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={user?.user_metadata.avatar_url || "/placeholder.svg?height=32&width=32"} alt={user?.id} />
+                <AvatarFallback>{user?.user_metadata.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             </Button>
