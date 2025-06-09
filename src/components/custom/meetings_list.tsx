@@ -6,6 +6,7 @@ import { Meeting, SearchMeetingsRequest_MeetingCategory } from '@/api/pb/schedul
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { Button } from '../ui/button';
 import { getMeetings } from '@/services/schedule'
+import { toast } from 'sonner';
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString("en-US", {
@@ -28,7 +29,6 @@ function MeetingCard({ meeting } : { meeting : Meeting}) {
   const isPast = meeting.startTime!.getTime() < new Date().getTime();
   const isNow =
     new Date().getTime() === meeting.startTime!.getTime()
-  console.log(meeting);
   
 
   return (
@@ -60,8 +60,8 @@ function MeetingCard({ meeting } : { meeting : Meeting}) {
                     src={participant.avatarUrl || "/placeholder.svg"}
                     alt={participant.name}
                   />
-                  <AvatarFallback className="rounded-full w-full h-full flex items-center justify-center">
-                    {participant.name.charAt(0)}
+                  <AvatarFallback className="rounded-full w-full h-full flex items-center justify-center bg-card">
+                    {(participant.name.charAt(0) || participant.email.charAt(0)).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               ))}
@@ -117,18 +117,21 @@ const MeetingsList = (props : MeetingsListProps) => {
     setLoading(true);
     setTimeout(async () => {
       const pageSize = 3;
-      const data = await getMeetings({
-        query: props.searchQuery || "",
-        category: props.category || SearchMeetingsRequest_MeetingCategory.ALL,
-        lastID: meetings.length > 0 ? meetings[meetings.length - 1].id : 0,
-        pageSize: pageSize,
-      });
-      setMeetings((prev) => [...prev, ...data]);
-
-      if (data.length < pageSize) {
-        setHasMore(false);
+      try {
+        const data = await getMeetings({
+            query: props.searchQuery || "",
+            category: props.category || SearchMeetingsRequest_MeetingCategory.ALL,
+            lastID: meetings.length > 0 ? meetings[meetings.length - 1].id : 0,
+            pageSize: pageSize,
+        });
+        setMeetings((prev) => [...prev, ...data]);
+        if (data.length < pageSize) {
+            setHasMore(false);
+        }
+      } catch (error) {
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }, 800);
   };
   return (
@@ -137,7 +140,11 @@ const MeetingsList = (props : MeetingsListProps) => {
           <MeetingCard key={meeting.id} meeting={meeting} />
         ))}
         <InfiniteScroll hasMore={hasMore} isLoading={loading} next={next} threshold={1}>
-          {hasMore && <Loader2 className="my-4 h-8 w-8 animate-spin" />}
+          {hasMore && (
+            <div className="flex justify-center">
+              <Loader2 className="my-4 h-8 w-8 animate-spin" />
+            </div>
+          )}
         </InfiniteScroll>
     </div>
   );
