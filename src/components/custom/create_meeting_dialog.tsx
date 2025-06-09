@@ -17,14 +17,14 @@ import {
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Calendar, Clock, Users, Video, MapPin, FileText, Plus, X, Dot } from "lucide-react"
+import { Calendar, Users, Video, MapPin, FileText, Plus, X, Dot } from "lucide-react"
 import { useCallback } from "react"
 import { DialogTrigger } from "@/components/ui/dialog"
 import { createMeeting } from "@/services/schedule"
 import { toast } from "sonner"
 import type { MeetingType } from "@/api/pb/schedule"
 import { BadRequest, BadRequest_FieldViolation } from "nice-grpc-error-details"
-// import { createMeeting } from "@/services/schedule" // Adjust the import path as necessary
+import { TimePicker } from "./time_picker"
 
 const CreateMeetingDialog = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -33,7 +33,15 @@ const CreateMeetingDialog = () => {
     const [err, setError] = useState<string | null>(null)
     const [validationViolations, setValidationViolations] = useState<string[]>([])
 
-    const onOpenChange = useCallback((open: boolean) => setIsOpen(open), [])
+    const onOpenChange = useCallback((open: boolean) => {
+        setIsOpen(open)
+        if (!open) {
+            setParticipants([])
+            setNewParticipant("")
+            setError(null)
+            setValidationViolations([])
+        }
+    }, [])
 
     const addParticipant = () => {
         if (newParticipant.trim() && !participants.includes(newParticipant.trim())) {
@@ -51,8 +59,18 @@ const CreateMeetingDialog = () => {
         const formData = new FormData(e.currentTarget as HTMLFormElement)
         const title = formData.get("title") as string
         const description = formData.get("description") as string
-        const startTime = new Date(formData.get("startTime") as string)
+        const startDate = formData.get("startDate") as string
+        console.log(startDate);
         
+        const startTimeInput = formData.get("startTime") as string
+        
+
+        let startTime: Date
+        const [year, month, day] = startDate.split("-").map(Number)
+        const [hour, minute] = startTimeInput.split(":").map(Number)
+        startTime = new Date(Date.UTC(year, month - 1, day, hour, minute))
+        startTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000)
+
         const participantsIDs = participants.map((p) => p.trim()).filter((p) => p)
         const type : MeetingType = formData.get("type") as unknown as MeetingType
         const [response, error] = await createMeeting({
@@ -151,43 +169,13 @@ const CreateMeetingDialog = () => {
                                     <h3 className="font-medium">Schedule</h3>
                                 </div>
 
-                                <div className="grid grid-cols-2 md: gap-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-medium flex items-center gap-2 white">
-                                            <Calendar className="w-3 h-3 white" />
-                                            Date *
-                                        </Label>
-                                        <Input type="date" name="startTime" className="h-11" required />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-medium flex items-center gap-2">
-                                            <Clock className="w-3 h-3" />
-                                            Start Time *
-                                        </Label>
-                                        <Select defaultValue="09:00">
-                                            <SelectTrigger className="h-11">
-                                                <SelectValue placeholder="Select start time" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {Array.from({ length: 17 }, (_, i) => {
-                                                    const hour = Math.floor(i / 2) + 9
-                                                    const minute = i % 2 === 0 ? "00" : "30"
-                                                    const time24 = `${hour.toString().padStart(2, "0")}:${minute}`
-                                                    const hour12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour
-                                                    const ampm = hour >= 12 ? "PM" : "AM"
-                                                    const time12 = `${hour12}:${minute} ${ampm}`
-
-                                                    return (
-                                                        <SelectItem key={time24} value={time24}>
-                                                            {time12}
-                                                        </SelectItem>
-                                                    )
-                                                })}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
+                                <div className="flex flex-col gap-4">
+                                    <TimePicker 
+                                        dateName="startDate" 
+                                        timeName="startTime"
+                                        dateRequired={true}
+                                        timeRequired={true}
+                                    />
                                     <div className="space-y-2">
                                         <Label className="text-sm font-medium flex items-center gap-2">
                                             <MapPin className="w-3 h-3" />
@@ -208,12 +196,6 @@ const CreateMeetingDialog = () => {
                                                     <div className="flex items-center gap-2">
                                                         <Users className="w-4 h-4" />
                                                         Audio Only
-                                                    </div>
-                                                </SelectItem>
-                                                <SelectItem value="in-person">
-                                                    <div className="flex items-center gap-2">
-                                                        <MapPin className="w-4 h-4" />
-                                                        In Person
                                                     </div>
                                                 </SelectItem>
                                             </SelectContent>

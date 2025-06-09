@@ -3,7 +3,7 @@ import { CreateMeetingRequest, MeetingType } from "@/api/pb/schedule";
 import { RichClientError } from "nice-grpc-error-details";
 import type { Empty } from "@/api/pb/google/protobuf/empty";
 import { Metadata } from "nice-grpc-web";
-import { getAccessToken, getCurrentUser } from "./auth";
+import { getAccessToken } from "./auth";
 
 interface CreateMeetingParams {
     title: string;
