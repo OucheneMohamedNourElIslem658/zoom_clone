@@ -153,7 +153,8 @@ func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeet
 
 	db := sr.database.Model(&models.Meeting{}).
 		Joins("JOIN meet_participants ON meet_participants.meeting_id = meetings.id").
-		Where("meet_participants.user_id = ?", userID)
+		Where("meet_participants.user_id = ?", userID).
+		Select("meetings.*, (SELECT COUNT(*) FROM meet_participants WHERE meet_participants.meeting_id = meetings.id) AS participants_count")
 
 	if req.Query != "" {
 		query := "%" + strings.ToLower(req.Query) + "%"
@@ -184,7 +185,7 @@ func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeet
 		return tx.
 			Joins("JOIN meet_participants ON meet_participants.user_id = users.id").
 			Order("meet_participants.is_host DESC").
-			Limit(4)
+			Limit(5)
 	})
 
 	// Final query
@@ -206,7 +207,7 @@ func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeet
 				AvatarUrl: p.RawUserMetaData.AvatarURL,
 			}
 
-			if i == 0 {
+			if i == 0 || i == 1 {
 				host = participant
 			} else {
 				others = append(others, participant)
@@ -222,6 +223,7 @@ func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeet
 			Type:                   schedulepb.MeetingType(schedulepb.MeetingType_value[string(m.Type)]),
 			Host:                   host,
 			FirstThreeParticipants: others,
+			ParticipantsCount:      uint32(m.ParticipantsCount),
 		})
 	}
 
@@ -258,7 +260,7 @@ func (sr *ScheduleRepo) GetAllUsers(userID string, req *schedulepb.SearchPartici
 	participants := make([]*schedulepb.MeetParticipant, 0, len(users))
 	for _, u := range users {
 		participants = append(participants, &schedulepb.MeetParticipant{
-			Id: u.ID,
+			Id:        u.ID,
 			Email:     u.Email,
 			Name:      u.RawUserMetaData.Name,
 			AvatarUrl: u.RawUserMetaData.AvatarURL,
