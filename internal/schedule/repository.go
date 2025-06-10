@@ -137,7 +137,7 @@ func (sr *ScheduleRepo) UpdateMeeting(hostID string, meeting *schedulepb.UpdateM
 		return status.Error(codes.FailedPrecondition, "Cannot update a cancelled meeting")
 	}
 
-	if meeting.IsCancelled != nil && !existingMeeting.IsCancelled {
+	if meeting.IsCancelled != nil && *meeting.IsCancelled && !existingMeeting.IsCancelled {
 		existingMeeting.IsCancelled = true
 	}
 
@@ -146,6 +146,53 @@ func (sr *ScheduleRepo) UpdateMeeting(hostID string, meeting *schedulepb.UpdateM
 	}
 
 	return nil
+}
+
+func (sr *ScheduleRepo) GetMeeting(userID string, req *schedulepb.GetMeetingRequest) (*schedulepb.Meeting, error) {
+	var meeting models.Meeting
+
+	if err := sr.database.Model(&models.Meeting{}).
+		Select("meetings.id, meetings.title, meetings.description, meetings.start_time, meetings.is_cancelled, meetings.type, meetings.created_at, meetings.deleted_at"). // Exclude participants_count
+		Joins("JOIN meet_participants ON meet_participants.meeting_id = meetings.id").
+		Where("meetings.id = ? AND meet_participants.user_id = ?", req.Id, userID).
+		Order("meet_participants.is_host DESC").
+		Preload("Participants").
+		First(&meeting).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, status.Error(codes.NotFound, "Meeting not found")
+		}
+		return nil, status.Error(codes.Internal, "Failed to fetch meeting")
+	}
+
+	var host *schedulepb.MeetParticipant
+	var others []*schedulepb.MeetParticipant
+
+	for i, p := range meeting.Participants {
+		participant := &schedulepb.MeetParticipant{
+			Id:        p.ID,
+			Email:     p.Email,
+			Name:      p.RawUserMetaData.Name,
+			AvatarUrl: p.RawUserMetaData.AvatarURL,
+		}
+
+		if i == 0 {
+			host = participant
+		} else {
+			others = append(others, participant)
+		}
+	}
+
+	return &schedulepb.Meeting{
+		Id:                     uint32(meeting.ID),
+		Title:                  meeting.Title,
+		Description:            meeting.Description,
+		StartTime:              timestamppb.New(meeting.StartTime),
+		IsCancelled:            meeting.IsCancelled,
+		Type:                   schedulepb.MeetingType(schedulepb.MeetingType_value[string(meeting.Type)]),
+		Host:                   host,
+		FirstThreeParticipants: others,
+		ParticipantsCount:      uint32(meeting.ParticipantsCount),
+	}, nil
 }
 
 func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeetingsRequest) (*schedulepb.SearchMeetingsResponse, error) {
@@ -224,6 +271,7 @@ func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeet
 			Host:                   host,
 			FirstThreeParticipants: others,
 			ParticipantsCount:      uint32(m.ParticipantsCount),
+			CurrentUserId:          userID,
 		})
 	}
 

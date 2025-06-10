@@ -129,6 +129,7 @@ type Meeting struct {
 	ParticipantsCount      uint32                 `protobuf:"varint,6,opt,name=participants_count,json=participantsCount,proto3" json:"participants_count,omitempty"`
 	Host                   *MeetParticipant       `protobuf:"bytes,7,opt,name=host,proto3" json:"host,omitempty"`
 	IsCancelled            bool                   `protobuf:"varint,8,opt,name=is_cancelled,json=isCancelled,proto3" json:"is_cancelled,omitempty"`
+	CurrentUserId          string                 `protobuf:"bytes,10,opt,name=current_user_id,json=currentUserId,proto3" json:"current_user_id,omitempty"`
 	FirstThreeParticipants []*MeetParticipant     `protobuf:"bytes,9,rep,name=first_three_participants,json=firstThreeParticipants,proto3" json:"first_three_participants,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
@@ -218,6 +219,13 @@ func (x *Meeting) GetIsCancelled() bool {
 		return x.IsCancelled
 	}
 	return false
+}
+
+func (x *Meeting) GetCurrentUserId() string {
+	if x != nil {
+		return x.CurrentUserId
+	}
+	return ""
 }
 
 func (x *Meeting) GetFirstThreeParticipants() []*MeetParticipant {
@@ -731,11 +739,55 @@ func (x *SearchParticipantsResponse) GetParticipants() []*MeetParticipant {
 	return nil
 }
 
+type GetMeetingRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMeetingRequest) Reset() {
+	*x = GetMeetingRequest{}
+	mi := &file_schedule_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMeetingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMeetingRequest) ProtoMessage() {}
+
+func (x *GetMeetingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_schedule_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMeetingRequest.ProtoReflect.Descriptor instead.
+func (*GetMeetingRequest) Descriptor() ([]byte, []int) {
+	return file_schedule_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetMeetingRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
 var File_schedule_proto protoreflect.FileDescriptor
 
 const file_schedule_proto_rawDesc = "" +
 	"\n" +
-	"\x0eschedule.proto\x12\bschedule\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x8d\x03\n" +
+	"\x0eschedule.proto\x12\bschedule\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xb5\x03\n" +
 	"\aMeeting\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -745,7 +797,9 @@ const file_schedule_proto_rawDesc = "" +
 	"start_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x12-\n" +
 	"\x12participants_count\x18\x06 \x01(\rR\x11participantsCount\x12-\n" +
 	"\x04host\x18\a \x01(\v2\x19.schedule.MeetParticipantR\x04host\x12!\n" +
-	"\fis_cancelled\x18\b \x01(\bR\visCancelled\x12S\n" +
+	"\fis_cancelled\x18\b \x01(\bR\visCancelled\x12&\n" +
+	"\x0fcurrent_user_id\x18\n" +
+	" \x01(\tR\rcurrentUserId\x12S\n" +
 	"\x18first_three_participants\x18\t \x03(\v2\x19.schedule.MeetParticipantR\x16firstThreeParticipants\"j\n" +
 	"\x0fMeetParticipant\x12\x0e\n" +
 	"\x02id\x18\x02 \x01(\tR\x02id\x12\x1d\n" +
@@ -800,13 +854,17 @@ const file_schedule_proto_rawDesc = "" +
 	"\n" +
 	"\b_last_id\"[\n" +
 	"\x1aSearchParticipantsResponse\x12=\n" +
-	"\fparticipants\x18\x01 \x03(\v2\x19.schedule.MeetParticipantR\fparticipants*#\n" +
+	"\fparticipants\x18\x01 \x03(\v2\x19.schedule.MeetParticipantR\fparticipants\"+\n" +
+	"\x11GetMeetingRequest\x12\x16\n" +
+	"\x02id\x18\x01 \x01(\rB\x06\xbaH\x03\xc8\x01\x01R\x02id*#\n" +
 	"\vMeetingType\x12\t\n" +
 	"\x05VIDEO\x10\x00\x12\t\n" +
-	"\x05AUDIO\x10\x012\xd9\x02\n" +
+	"\x05AUDIO\x10\x012\x97\x03\n" +
 	"\x0fScheduleService\x12G\n" +
 	"\rCreateMeeting\x12\x1e.schedule.CreateMeetingRequest\x1a\x16.google.protobuf.Empty\x12G\n" +
-	"\rUpdateMeeting\x12\x1e.schedule.UpdateMeetingRequest\x1a\x16.google.protobuf.Empty\x12S\n" +
+	"\rUpdateMeeting\x12\x1e.schedule.UpdateMeetingRequest\x1a\x16.google.protobuf.Empty\x12<\n" +
+	"\n" +
+	"GetMeeting\x12\x1b.schedule.GetMeetingRequest\x1a\x11.schedule.Meeting\x12S\n" +
 	"\x0eSearchMeetings\x12\x1f.schedule.SearchMeetingsRequest\x1a .schedule.SearchMeetingsResponse\x12_\n" +
 	"\x12SearchParticipants\x12#.schedule.SearchParticipantsRequest\x1a$.schedule.SearchParticipantsResponseB\x03Z\x01.b\x06proto3"
 
@@ -823,7 +881,7 @@ func file_schedule_proto_rawDescGZIP() []byte {
 }
 
 var file_schedule_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_schedule_proto_goTypes = []any{
 	(MeetingType)(0), // 0: schedule.MeetingType
 	(SearchMeetingsRequest_MeetingCategory)(0), // 1: schedule.SearchMeetingsRequest.MeetingCategory
@@ -836,17 +894,18 @@ var file_schedule_proto_goTypes = []any{
 	(*SearchMeetingsResponse)(nil),     // 8: schedule.SearchMeetingsResponse
 	(*SearchParticipantsRequest)(nil),  // 9: schedule.SearchParticipantsRequest
 	(*SearchParticipantsResponse)(nil), // 10: schedule.SearchParticipantsResponse
-	(*timestamppb.Timestamp)(nil),      // 11: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),              // 12: google.protobuf.Empty
+	(*GetMeetingRequest)(nil),          // 11: schedule.GetMeetingRequest
+	(*timestamppb.Timestamp)(nil),      // 12: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),              // 13: google.protobuf.Empty
 }
 var file_schedule_proto_depIdxs = []int32{
 	0,  // 0: schedule.Meeting.type:type_name -> schedule.MeetingType
-	11, // 1: schedule.Meeting.start_time:type_name -> google.protobuf.Timestamp
+	12, // 1: schedule.Meeting.start_time:type_name -> google.protobuf.Timestamp
 	3,  // 2: schedule.Meeting.host:type_name -> schedule.MeetParticipant
 	3,  // 3: schedule.Meeting.first_three_participants:type_name -> schedule.MeetParticipant
-	11, // 4: schedule.CreateMeetingRequest.start_time:type_name -> google.protobuf.Timestamp
+	12, // 4: schedule.CreateMeetingRequest.start_time:type_name -> google.protobuf.Timestamp
 	0,  // 5: schedule.CreateMeetingRequest.type:type_name -> schedule.MeetingType
-	11, // 6: schedule.UpdateMeetingRequest.start_time:type_name -> google.protobuf.Timestamp
+	12, // 6: schedule.UpdateMeetingRequest.start_time:type_name -> google.protobuf.Timestamp
 	0,  // 7: schedule.UpdateMeetingRequest.type:type_name -> schedule.MeetingType
 	2,  // 8: schedule.UpdateMeetingResponse.meeting:type_name -> schedule.Meeting
 	1,  // 9: schedule.SearchMeetingsRequest.category:type_name -> schedule.SearchMeetingsRequest.MeetingCategory
@@ -854,14 +913,16 @@ var file_schedule_proto_depIdxs = []int32{
 	3,  // 11: schedule.SearchParticipantsResponse.participants:type_name -> schedule.MeetParticipant
 	4,  // 12: schedule.ScheduleService.CreateMeeting:input_type -> schedule.CreateMeetingRequest
 	5,  // 13: schedule.ScheduleService.UpdateMeeting:input_type -> schedule.UpdateMeetingRequest
-	7,  // 14: schedule.ScheduleService.SearchMeetings:input_type -> schedule.SearchMeetingsRequest
-	9,  // 15: schedule.ScheduleService.SearchParticipants:input_type -> schedule.SearchParticipantsRequest
-	12, // 16: schedule.ScheduleService.CreateMeeting:output_type -> google.protobuf.Empty
-	12, // 17: schedule.ScheduleService.UpdateMeeting:output_type -> google.protobuf.Empty
-	8,  // 18: schedule.ScheduleService.SearchMeetings:output_type -> schedule.SearchMeetingsResponse
-	10, // 19: schedule.ScheduleService.SearchParticipants:output_type -> schedule.SearchParticipantsResponse
-	16, // [16:20] is the sub-list for method output_type
-	12, // [12:16] is the sub-list for method input_type
+	11, // 14: schedule.ScheduleService.GetMeeting:input_type -> schedule.GetMeetingRequest
+	7,  // 15: schedule.ScheduleService.SearchMeetings:input_type -> schedule.SearchMeetingsRequest
+	9,  // 16: schedule.ScheduleService.SearchParticipants:input_type -> schedule.SearchParticipantsRequest
+	13, // 17: schedule.ScheduleService.CreateMeeting:output_type -> google.protobuf.Empty
+	13, // 18: schedule.ScheduleService.UpdateMeeting:output_type -> google.protobuf.Empty
+	2,  // 19: schedule.ScheduleService.GetMeeting:output_type -> schedule.Meeting
+	8,  // 20: schedule.ScheduleService.SearchMeetings:output_type -> schedule.SearchMeetingsResponse
+	10, // 21: schedule.ScheduleService.SearchParticipants:output_type -> schedule.SearchParticipantsResponse
+	17, // [17:22] is the sub-list for method output_type
+	12, // [12:17] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -881,7 +942,7 @@ func file_schedule_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_schedule_proto_rawDesc), len(file_schedule_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

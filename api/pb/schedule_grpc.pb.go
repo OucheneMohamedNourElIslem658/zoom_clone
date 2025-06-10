@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	ScheduleService_CreateMeeting_FullMethodName      = "/schedule.ScheduleService/CreateMeeting"
 	ScheduleService_UpdateMeeting_FullMethodName      = "/schedule.ScheduleService/UpdateMeeting"
+	ScheduleService_GetMeeting_FullMethodName         = "/schedule.ScheduleService/GetMeeting"
 	ScheduleService_SearchMeetings_FullMethodName     = "/schedule.ScheduleService/SearchMeetings"
 	ScheduleService_SearchParticipants_FullMethodName = "/schedule.ScheduleService/SearchParticipants"
 )
@@ -32,6 +33,7 @@ const (
 type ScheduleServiceClient interface {
 	CreateMeeting(ctx context.Context, in *CreateMeetingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateMeeting(ctx context.Context, in *UpdateMeetingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetMeeting(ctx context.Context, in *GetMeetingRequest, opts ...grpc.CallOption) (*Meeting, error)
 	SearchMeetings(ctx context.Context, in *SearchMeetingsRequest, opts ...grpc.CallOption) (*SearchMeetingsResponse, error)
 	SearchParticipants(ctx context.Context, in *SearchParticipantsRequest, opts ...grpc.CallOption) (*SearchParticipantsResponse, error)
 }
@@ -64,6 +66,16 @@ func (c *scheduleServiceClient) UpdateMeeting(ctx context.Context, in *UpdateMee
 	return out, nil
 }
 
+func (c *scheduleServiceClient) GetMeeting(ctx context.Context, in *GetMeetingRequest, opts ...grpc.CallOption) (*Meeting, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Meeting)
+	err := c.cc.Invoke(ctx, ScheduleService_GetMeeting_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *scheduleServiceClient) SearchMeetings(ctx context.Context, in *SearchMeetingsRequest, opts ...grpc.CallOption) (*SearchMeetingsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SearchMeetingsResponse)
@@ -90,6 +102,7 @@ func (c *scheduleServiceClient) SearchParticipants(ctx context.Context, in *Sear
 type ScheduleServiceServer interface {
 	CreateMeeting(context.Context, *CreateMeetingRequest) (*emptypb.Empty, error)
 	UpdateMeeting(context.Context, *UpdateMeetingRequest) (*emptypb.Empty, error)
+	GetMeeting(context.Context, *GetMeetingRequest) (*Meeting, error)
 	SearchMeetings(context.Context, *SearchMeetingsRequest) (*SearchMeetingsResponse, error)
 	SearchParticipants(context.Context, *SearchParticipantsRequest) (*SearchParticipantsResponse, error)
 	mustEmbedUnimplementedScheduleServiceServer()
@@ -107,6 +120,9 @@ func (UnimplementedScheduleServiceServer) CreateMeeting(context.Context, *Create
 }
 func (UnimplementedScheduleServiceServer) UpdateMeeting(context.Context, *UpdateMeetingRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateMeeting not implemented")
+}
+func (UnimplementedScheduleServiceServer) GetMeeting(context.Context, *GetMeetingRequest) (*Meeting, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMeeting not implemented")
 }
 func (UnimplementedScheduleServiceServer) SearchMeetings(context.Context, *SearchMeetingsRequest) (*SearchMeetingsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchMeetings not implemented")
@@ -171,6 +187,24 @@ func _ScheduleService_UpdateMeeting_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ScheduleService_GetMeeting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMeetingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ScheduleServiceServer).GetMeeting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ScheduleService_GetMeeting_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ScheduleServiceServer).GetMeeting(ctx, req.(*GetMeetingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ScheduleService_SearchMeetings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SearchMeetingsRequest)
 	if err := dec(in); err != nil {
@@ -221,6 +255,10 @@ var ScheduleService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateMeeting",
 			Handler:    _ScheduleService_UpdateMeeting_Handler,
+		},
+		{
+			MethodName: "GetMeeting",
+			Handler:    _ScheduleService_GetMeeting_Handler,
 		},
 		{
 			MethodName: "SearchMeetings",

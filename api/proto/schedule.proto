@@ -22,6 +22,7 @@ message Meeting {
     uint32 participants_count = 6;
     MeetParticipant host = 7;
     bool is_cancelled = 8;
+    string current_user_id = 10;
     repeated MeetParticipant first_three_participants = 9;
 }
 
@@ -110,9 +111,14 @@ message SearchParticipantsResponse {
     repeated MeetParticipant participants = 1;
 }
 
+message GetMeetingRequest {
+    uint32 id = 1 [(buf.validate.field).required = true];
+}
+
 service ScheduleService {
     rpc CreateMeeting (CreateMeetingRequest) returns (.google.protobuf.Empty);
     rpc UpdateMeeting (UpdateMeetingRequest) returns (.google.protobuf.Empty);
+    rpc GetMeeting (GetMeetingRequest) returns (Meeting);
     rpc SearchMeetings (SearchMeetingsRequest) returns (SearchMeetingsResponse);
     rpc SearchParticipants (SearchParticipantsRequest) returns (SearchParticipantsResponse);
 }

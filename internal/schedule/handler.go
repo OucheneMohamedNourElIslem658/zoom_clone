@@ -51,9 +51,22 @@ func (sh *ScheduleHandler) UpdateMeeting(ctx context.Context, req *pb.UpdateMeet
 	return &emptypb.Empty{}, nil
 }
 
+func (sh *ScheduleHandler) GetMeeting(ctx context.Context, req *pb.GetMeetingRequest) (*pb.Meeting, error) {
+	userID, ok := ctx.Value("user_id").(string)
+	if !ok {
+		return nil, status.Errorf(codes.Unauthenticated, "Requester is not authenticated")
+	}
+
+	result, err := sh.scheduleRepo.GetMeeting(userID, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func (sh *ScheduleHandler) SearchMeetings(ctx context.Context, req *pb.SearchMeetingsRequest) (*pb.SearchMeetingsResponse, error) {
 	userID, ok := ctx.Value("user_id").(string)
-	log.Println("userID:", userID)
 	if !ok {
 		return nil, status.Errorf(codes.Unauthenticated, "Requester is not authenticated")
 	}
