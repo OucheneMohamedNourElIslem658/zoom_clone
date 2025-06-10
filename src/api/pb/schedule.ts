@@ -54,6 +54,7 @@ export interface Meeting {
   participantsCount: number;
   host: MeetParticipant | undefined;
   isCancelled: boolean;
+  currentuserId: string;
   firstThreeParticipants: MeetParticipant[];
 }
 
@@ -147,6 +148,10 @@ export interface SearchParticipantsResponse {
   participants: MeetParticipant[];
 }
 
+export interface GetMeetingRequest {
+  id: number;
+}
+
 function createBaseMeeting(): Meeting {
   return {
     id: 0,
@@ -157,6 +162,7 @@ function createBaseMeeting(): Meeting {
     participantsCount: 0,
     host: undefined,
     isCancelled: false,
+    currentuserId: "",
     firstThreeParticipants: [],
   };
 }
@@ -186,6 +192,9 @@ export const Meeting: MessageFns<Meeting> = {
     }
     if (message.isCancelled !== false) {
       writer.uint32(64).bool(message.isCancelled);
+    }
+    if (message.currentuserId !== "") {
+      writer.uint32(82).string(message.currentuserId);
     }
     for (const v of message.firstThreeParticipants) {
       MeetParticipant.encode(v!, writer.uint32(74).fork()).join();
@@ -264,6 +273,14 @@ export const Meeting: MessageFns<Meeting> = {
           message.isCancelled = reader.bool();
           continue;
         }
+        case 10: {
+          if (tag !== 82) {
+            break;
+          }
+
+          message.currentuserId = reader.string();
+          continue;
+        }
         case 9: {
           if (tag !== 74) {
             break;
@@ -291,6 +308,7 @@ export const Meeting: MessageFns<Meeting> = {
       participantsCount: isSet(object.participantsCount) ? globalThis.Number(object.participantsCount) : 0,
       host: isSet(object.host) ? MeetParticipant.fromJSON(object.host) : undefined,
       isCancelled: isSet(object.isCancelled) ? globalThis.Boolean(object.isCancelled) : false,
+      currentuserId: isSet(object.currentuserId) ? globalThis.String(object.currentuserId) : "",
       firstThreeParticipants: globalThis.Array.isArray(object?.firstThreeParticipants)
         ? object.firstThreeParticipants.map((e: any) => MeetParticipant.fromJSON(e))
         : [],
@@ -323,6 +341,9 @@ export const Meeting: MessageFns<Meeting> = {
     if (message.isCancelled !== false) {
       obj.isCancelled = message.isCancelled;
     }
+    if (message.currentuserId !== "") {
+      obj.currentuserId = message.currentuserId;
+    }
     if (message.firstThreeParticipants?.length) {
       obj.firstThreeParticipants = message.firstThreeParticipants.map((e) => MeetParticipant.toJSON(e));
     }
@@ -344,6 +365,7 @@ export const Meeting: MessageFns<Meeting> = {
       ? MeetParticipant.fromPartial(object.host)
       : undefined;
     message.isCancelled = object.isCancelled ?? false;
+    message.currentuserId = object.currentuserId ?? "";
     message.firstThreeParticipants = object.firstThreeParticipants?.map((e) => MeetParticipant.fromPartial(e)) || [];
     return message;
   },
@@ -1150,6 +1172,64 @@ export const SearchParticipantsResponse: MessageFns<SearchParticipantsResponse> 
   },
 };
 
+function createBaseGetMeetingRequest(): GetMeetingRequest {
+  return { id: 0 };
+}
+
+export const GetMeetingRequest: MessageFns<GetMeetingRequest> = {
+  encode(message: GetMeetingRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== 0) {
+      writer.uint32(8).uint32(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetMeetingRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetMeetingRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = reader.uint32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetMeetingRequest {
+    return { id: isSet(object.id) ? globalThis.Number(object.id) : 0 };
+  },
+
+  toJSON(message: GetMeetingRequest): unknown {
+    const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GetMeetingRequest>): GetMeetingRequest {
+    return GetMeetingRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetMeetingRequest>): GetMeetingRequest {
+    const message = createBaseGetMeetingRequest();
+    message.id = object.id ?? 0;
+    return message;
+  },
+};
+
 export type ScheduleServiceDefinition = typeof ScheduleServiceDefinition;
 export const ScheduleServiceDefinition = {
   name: "ScheduleService",
@@ -1168,6 +1248,14 @@ export const ScheduleServiceDefinition = {
       requestType: UpdateMeetingRequest,
       requestStream: false,
       responseType: Empty,
+      responseStream: false,
+      options: {},
+    },
+    getMeeting: {
+      name: "GetMeeting",
+      requestType: GetMeetingRequest,
+      requestStream: false,
+      responseType: Meeting,
       responseStream: false,
       options: {},
     },
@@ -1193,6 +1281,7 @@ export const ScheduleServiceDefinition = {
 export interface ScheduleServiceImplementation<CallContextExt = {}> {
   createMeeting(request: CreateMeetingRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Empty>>;
   updateMeeting(request: UpdateMeetingRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Empty>>;
+  getMeeting(request: GetMeetingRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Meeting>>;
   searchMeetings(
     request: SearchMeetingsRequest,
     context: CallContext & CallContextExt,
@@ -1206,6 +1295,7 @@ export interface ScheduleServiceImplementation<CallContextExt = {}> {
 export interface ScheduleServiceClient<CallOptionsExt = {}> {
   createMeeting(request: DeepPartial<CreateMeetingRequest>, options?: CallOptions & CallOptionsExt): Promise<Empty>;
   updateMeeting(request: DeepPartial<UpdateMeetingRequest>, options?: CallOptions & CallOptionsExt): Promise<Empty>;
+  getMeeting(request: DeepPartial<GetMeetingRequest>, options?: CallOptions & CallOptionsExt): Promise<Meeting>;
   searchMeetings(
     request: DeepPartial<SearchMeetingsRequest>,
     options?: CallOptions & CallOptionsExt,

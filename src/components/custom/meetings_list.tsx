@@ -6,6 +6,7 @@ import { Meeting, SearchMeetingsRequest_MeetingCategory } from '@/api/pb/schedul
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { Button } from '../ui/button';
 import { getMeetings } from '@/services/schedule'
+import UpdateMeetingDialog from './update_meeting_dialog';
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString("en-US", {
@@ -38,6 +39,7 @@ function MeetingCard({ meeting } : { meeting : Meeting}) {
             <h3 className="font-medium text-lg">{meeting.title}</h3>
             {isNow && <Badge className="bg-green-500">Now</Badge>}
           </div>
+            <p className="text-muted-foreground">{meeting.description}</p>
           <div className="flex items-center text-muted-foreground gap-4">
             <div className="flex items-center gap-1">
               <CalendarDays className="h-4 w-4" />
@@ -87,9 +89,7 @@ function MeetingCard({ meeting } : { meeting : Meeting}) {
             </>
           ) : (
             <>
-              <Button variant="outline" size="sm">
-                Edit
-              </Button>
+              {meeting.currentuserId == meeting.host?.id && (<UpdateMeetingDialog meetingID={meeting.id}/>)}
               <Button size="sm" className="gap-1">
                 <Video className="h-4 w-4" />
                 {isNow ? "Join Now" : "Join"}
@@ -107,25 +107,41 @@ interface MeetingsListProps {
     searchQuery?: string;
 }
 
-const MeetingsList = (props : MeetingsListProps) => {
+const MeetingsList = (props: MeetingsListProps) => {
   const [loading, setLoading] = React.useState(false);
   const [hasMore, setHasMore] = React.useState(true);
   const [meetings, setMeetings] = React.useState<Meeting[]>([]);
+  const prevCategory = React.useRef(props.category);
+  const prevQuery = React.useRef(props.searchQuery);
+
+  // Reset meetings when category or searchQuery changes
+  React.useEffect(() => {
+    if (
+      prevCategory.current !== props.category ||
+      prevQuery.current !== props.searchQuery
+    ) {
+      setMeetings([]);
+      setHasMore(true);
+      prevCategory.current = props.category;
+      prevQuery.current = props.searchQuery;
+    }
+  }, [props.category, props.searchQuery]);
 
   const next = async () => {
+    if (loading || !hasMore) return;
     setLoading(true);
     setTimeout(async () => {
-      const pageSize = 3;
+      const pageSize = 10;
       try {
         const data = await getMeetings({
-            query: props.searchQuery || "",
-            category: props.category || SearchMeetingsRequest_MeetingCategory.ALL,
-            lastID: meetings.length > 0 ? meetings[meetings.length - 1].id : 0,
-            pageSize: pageSize,
+          query: props.searchQuery || "",
+          category: props.category || SearchMeetingsRequest_MeetingCategory.ALL,
+          lastID: meetings.length > 0 ? meetings[meetings.length - 1].id : 0,
+          pageSize: pageSize,
         });
         setMeetings((prev) => [...prev, ...data]);
         if (data.length < pageSize) {
-            setHasMore(false);
+          setHasMore(false);
         }
       } catch (error) {
       } finally {
@@ -133,18 +149,19 @@ const MeetingsList = (props : MeetingsListProps) => {
       }
     }, 800);
   };
+
   return (
     <div className="flex flex-col gap-4">
-        {meetings.map((meeting) => (
-          <MeetingCard key={meeting.id} meeting={meeting} />
-        ))}
-        <InfiniteScroll hasMore={hasMore} isLoading={loading} next={next} threshold={1}>
-          {hasMore && (
-            <div className="flex justify-center">
-              <Loader2 className="my-4 h-8 w-8 animate-spin" />
-            </div>
-          )}
-        </InfiniteScroll>
+      {meetings.map((meeting) => (
+        <MeetingCard key={meeting.id} meeting={meeting} />
+      ))}
+      <InfiniteScroll hasMore={hasMore} isLoading={loading} next={next} threshold={1}>
+        {hasMore && (
+          <div className="flex justify-center">
+            <Loader2 className="my-4 h-8 w-8 animate-spin" />
+          </div>
+        )}
+      </InfiniteScroll>
     </div>
   );
 };

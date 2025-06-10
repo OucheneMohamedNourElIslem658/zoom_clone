@@ -14,9 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Calendar, Users, Video, MapPin, FileText, Plus, X, Dot } from "lucide-react"
+import { Calendar, Users, Video, MapPin, FileText, Plus } from "lucide-react"
 import { useCallback } from "react"
 import { DialogTrigger } from "@/components/ui/dialog"
 import { createMeeting } from "@/services/schedule"
@@ -25,6 +25,7 @@ import type { MeetingType } from "@/api/pb/schedule"
 import { BadRequest, BadRequest_FieldViolation } from "nice-grpc-error-details"
 import { TimePicker } from "./time_picker"
 import PaginatedUsersSearchCard from "./paginated_users_search_card"
+import { ErrorCard } from "./error_card"
 
 const CreateMeetingDialog = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -47,8 +48,6 @@ const CreateMeetingDialog = () => {
         const title = formData.get("title") as string
         const description = formData.get("description") as string
         const startDate = formData.get("startDate") as string
-        console.log(startDate);
-        
         const startTimeInput = formData.get("startTime") as string
         
 
@@ -200,25 +199,7 @@ const CreateMeetingDialog = () => {
                     />
 
                     {/* Error Card */}
-                    {err && (
-                        <Card className="border-destructive bg-destructive/10">
-                            {err && <CardHeader>
-                                <CardTitle className="text-destructive"> {err} </CardTitle>
-                                <CardAction>
-                                    <X className="w-4 h-4 cursor-pointer" onClick={() => setError(null)} />
-                                </CardAction>
-                            </CardHeader>}
-                            {validationViolations.length > 0 && <CardContent>
-                                <ul className="mt-2 space-y-1">
-                                    {validationViolations.map((violation, index) => (
-                                        <li key={index} className="text-sm text-destructive flex items-center gap-1">
-                                            <Dot /> {violation}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </CardContent>}
-                        </Card>
-                    )}
+                    <ErrorCard err={err} validationViolations={validationViolations} setError={setError} />
 
                     <Separator />
 

@@ -1,27 +1,13 @@
-"use client"
-
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Search, Plus, CalendarDays } from "lucide-react"
+import { Search } from "lucide-react"
 import CreateMeetingDialog from "@/components/custom/create_meeting_dialog"
 import MeetingsList from "@/components/custom/meetings_list"
 import { SearchMeetingsRequest_MeetingCategory } from "@/api/pb/schedule"
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [activeTab, setActiveTab] = useState("upcoming")
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,20 +20,33 @@ export default function HomePage() {
           <div className="flex items-center gap-4 w-full md:w-auto">
             <div className="relative w-full md:w-64">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search meetings..."
-                className="pl-8 w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  const formData = new FormData(e.currentTarget)
+                  const query = formData.get("search") as string
+                  setSearchQuery(query.trim())
+                }}
+              >
+                <Input
+                  type="search"
+                  name="search"
+                  placeholder="Search meetings..."
+                  className="pl-8 w-full"
+                />
+                <div className="w-0 h-0 overflow-hidden">
+                  <input
+                    type="submit"
+                  />
+                </div>
+              </form>
             </div>
             <CreateMeetingDialog/>
           </div>
         </div>
 
         <div className="space-y-6">
-          <Tabs defaultValue="upcoming" className="w-full" onValueChange={setActiveTab}>
+          <Tabs defaultValue="upcoming" className="w-full">
             <TabsList className="grid grid-cols-3 mb-6 sticky top-3 z-10">
               <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               <TabsTrigger value="past">Past</TabsTrigger>

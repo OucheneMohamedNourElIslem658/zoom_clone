@@ -1,5 +1,5 @@
 import client from "@/commun/meetings";
-import { CreateMeetingRequest, MeetingType, SearchMeetingsRequest, SearchMeetingsRequest_MeetingCategory, SearchParticipantsRequest } from "@/api/pb/schedule";
+import { CreateMeetingRequest, GetMeetingRequest, MeetingType, SearchMeetingsRequest, SearchMeetingsRequest_MeetingCategory, SearchParticipantsRequest, UpdateMeetingRequest } from "@/api/pb/schedule";
 import { RichClientError } from "nice-grpc-error-details";
 import type { Empty } from "@/api/pb/google/protobuf/empty";
 import { Metadata } from "nice-grpc-web";
@@ -53,31 +53,91 @@ export const createMeeting = async ({
     }
 };
 
-// const updateMeeting = async (
-//     id: number,
-//     newTitle: string,
-//     newDescription: string,
-//     newStartTimeUnix: number,
-//     newType: MeetingType,
-//     newParticipantsIDs: string[] = [],
-//     setIsparticipantidsempty : boolean = false,
-//     isCanceled : boolean = false
-// ) => {
-//     const request = new UpdateMeetingRequest()
-//     request.setId(id)
-//     request.setTitle(newTitle)
-//     request.setType(newType)
-//     request.setParticipantIdsList(newParticipantsIDs)
-//     request.setIsparticipantidsempty(setIsparticipantidsempty)
-//     request.setDescription(newDescription);
-//     const newStartTimestamp = new Timestamp();
-//     newStartTimestamp.setSeconds(Math.floor(newStartTimeUnix / 1000));
-//     newStartTimestamp.setNanos((newStartTimeUnix % 1000) * 1e6);
-//     request.setStartTime(newStartTimestamp);
-//     request.setIsCancelled(isCanceled)
+interface UpdateMeetingParams {
+    id: number;
+    newTitle?: string;
+    newDescription?: string;
+    newStartTime?: Date;
+    newType?: MeetingType;
+    newParticipantsIDs?: string[];
+    setIsparticipantidsempty?: boolean;
+    isCanceled?: boolean;
+}
 
-//     await client.updateMeeting(request)
-// }
+export const updateMeeting = async (
+    {
+        id,
+        newTitle,
+        newDescription,
+        newStartTime,
+        newType,
+        newParticipantsIDs,
+        setIsparticipantidsempty = false,
+        isCanceled = false
+    }: UpdateMeetingParams
+) : Promise<[ Empty | null, RichClientError | null]> => {
+    try {
+        const request = UpdateMeetingRequest.create({
+            id: id,
+            title: newTitle,
+            description: newDescription,
+            startTime: newStartTime,
+            type: newType,
+            participantIds: newParticipantsIDs,
+            isParticipantIdsEmpty: setIsparticipantidsempty,
+            isCancelled: isCanceled
+        })
+
+        const accessToken = await getAccessToken();
+        if (!accessToken) {
+            throw new Error("Access token is not available. Please log in.");
+        }
+
+        let metadata: any = undefined;
+        if (accessToken) {
+            metadata = new Metadata();
+            metadata.set("Authorization", `Bearer ${accessToken}`);
+        }
+
+        const reponse = await client.updateMeeting(request, {
+            metadata: metadata
+        })
+
+        return [reponse, null];
+    } catch (error) {
+        if (error instanceof RichClientError) {
+            return [null, error];
+        }
+        return [null, error as RichClientError];
+    }
+}
+
+interface GetMeetParams {
+    id: number;
+}
+
+export const getMeeting = async ({ id }: GetMeetParams) => {
+    const request = GetMeetingRequest.create({
+        id: id
+    });
+
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+        throw new Error("Access token is not available. Please log in.");
+    }
+
+    let metadata: any = undefined;
+    if (accessToken) {
+        metadata = new Metadata();
+        metadata.set("Authorization", `Bearer ${accessToken}`);
+    }
+
+    const meeting = await client.getMeeting(request, {
+        metadata: metadata
+    });
+
+    return meeting;
+}
 
 interface GetMeetingsParams {
     query: string;

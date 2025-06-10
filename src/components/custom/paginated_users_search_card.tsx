@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -17,8 +17,19 @@ interface User {
   avatarUrl?: string
 }
 
-export default function PaginatedUsersSearchCard({ onParticipantsChange }: { onParticipantsChange?: (participants: User[]) => void }) {
+export default function PaginatedUsersSearchCard({
+    onParticipantsChange,
+    defaultSelectedUsers = [],
+}: {
+    onParticipantsChange?: (participants: User[]) => void
+    defaultSelectedUsers?: User[]
+}) {
+    
     const [participants, setParticipants] = useState<User[]>([])
+
+    useEffect(() => {
+        setParticipants(defaultSelectedUsers)
+    }, [defaultSelectedUsers])
     const [searchOpen, setSearchOpen] = useState(false)
     const [searchValue, setSearchValue] = useState("")
 
@@ -49,7 +60,7 @@ export default function PaginatedUsersSearchCard({ onParticipantsChange }: { onP
 
     return (
         <Card>
-            <CardContent className="p-6">
+            <CardContent>
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="flex items-center gap-2">
@@ -163,7 +174,7 @@ export default function PaginatedUsersSearchCard({ onParticipantsChange }: { onP
                                 <div className="flex flex-wrap gap-2">
                                     {participants.map((participant, _) => (
                                         <Badge key={participant.email} variant="secondary" className="flex items-center gap-2 px-3 py-1.5 text-sm">
-                                            <span className="truncate max-w-[200px]">{participant.name} ({participant.email})</span>
+                                            <span className="truncate">{participant.email}</span>
                                             <Button
                                                 type="button"
                                                 variant="ghost"
