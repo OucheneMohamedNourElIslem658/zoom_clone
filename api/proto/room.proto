@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package room;
+
+option go_package = ".";
+
+import "buf/validate/validate.proto";
+
+service RoomService {
+    rpc JoinRoom(JoinRoomRequest) returns (JoinRoomResponse);
+    // rpc GetRoom(GetRoomRequest) returns (Room);
+}
+
+message JoinRoomRequest {
+    uint32 meeting_id = 1 [(buf.validate.field).required = true];
+}
+
+message JoinRoomResponse {
+    string token = 1;
+}

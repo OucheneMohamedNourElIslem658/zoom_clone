@@ -4,12 +4,13 @@ import (
 	"log"
 	"net"
 
+	pb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/config"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/internal/interceptors"
+	"github.com/OucheneMohamedNourElIslem658/zoom_clone/internal/room"
+	schedule "github.com/OucheneMohamedNourElIslem658/zoom_clone/internal/schedule"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/auth"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/database"
-	schedule "github.com/OucheneMohamedNourElIslem658/zoom_clone/internal/schedule"
-	pb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
 	"google.golang.org/grpc"
 )
 
@@ -40,6 +41,9 @@ func main()  {
 	// Register your gRPC services here
 	scheduleHandler := schedule.NewScheduleHandler()
 	pb.RegisterScheduleServiceServer(grpcServer, scheduleHandler)
+
+	roomHandler := room.NewRoomHandler()
+	pb.RegisterRoomServiceServer(grpcServer, roomHandler)
 
 	// Run the gRPC server
 	log.Printf("gRPC server is running on %s:%s", config.GRPCHost, config.GRPCPort)

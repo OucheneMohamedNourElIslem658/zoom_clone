@@ -19,6 +19,9 @@ type Config struct {
 	SupabaseAPIKey    string
 	GRPCPort          string
 	GRPCHost          string
+	LiveKitAPIKey     string
+	LiveKitAPISecret  string
+	LiveKitURL        string
 }
 
 func Load() *Config {
@@ -36,6 +39,9 @@ func Load() *Config {
 		SupabaseAPIKey:    os.Getenv("SUPABASE_API_KEY"),
 		GRPCPort:          os.Getenv("GRPC_PORT"),
 		GRPCHost:          os.Getenv("GRPC_HOST"),
+		LiveKitAPIKey:     os.Getenv("LIVEKIT_API_KEY"),
+		LiveKitAPISecret:  os.Getenv("LIVEKIT_API_SECRET"),
+		LiveKitURL:        os.Getenv("LIVEKIT_URL"),
 	}
 }
 
