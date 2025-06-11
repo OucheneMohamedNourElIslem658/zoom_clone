@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { getMeetings, updateMeeting } from '@/services/schedule'
 import UpdateMeetingDialog from './update_meeting_dialog';
 import { ActionConfiramationDialog } from './action_confirmation_dialog';
+import { Link } from 'react-router-dom';
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString("en-US", {
@@ -30,6 +31,8 @@ function MeetingCard({ meeting, onUpdate } : { meeting : Meeting, onUpdate: () =
   const isPast = meeting.startTime!.getTime() < new Date().getTime();
   const isNow =
     new Date().getTime() === meeting.startTime!.getTime()
+
+  const authorizedToEdit = meeting.currentuserId == meeting.host?.id && !meeting.isCancelled;
   
 
   return (
@@ -88,17 +91,19 @@ function MeetingCard({ meeting, onUpdate } : { meeting : Meeting, onUpdate: () =
                 Meeting Notes
               </Button>
             </>
-          ) : meeting.currentuserId == meeting.host?.id && !meeting.isCancelled && (
+          ) : 
             <>
-              <UpdateMeetingDialog 
+              { authorizedToEdit && (<UpdateMeetingDialog 
                 meetingID={meeting.id}
                 onUpdate={onUpdate}
-              />
-              <Button size="sm" className="gap-1">
-                <Video/>
-                Join
-              </Button>
-              <ActionConfiramationDialog
+              />)}
+                <Link to={`/meetings/${meeting.id}/preparation`} target="_blank" rel="noopener noreferrer">
+                <Button size="sm" className="gap-1">
+                  <Video/>
+                  Join
+                </Button>
+                </Link>
+              { authorizedToEdit && (<ActionConfiramationDialog
                 title='Cancel Meeting'
                 description='Are you sure you want to cancel this meeting? This action cannot be undone.'
                 onCancel={() => {}}
@@ -112,9 +117,9 @@ function MeetingCard({ meeting, onUpdate } : { meeting : Meeting, onUpdate: () =
                 trigger={
                   <Button size="sm" className="gap-1" variant={"destructive"}>Cancel</Button>
                 }
-              />
+              />)}
             </>
-          )}
+          }
         </div>
       </div>
     </div>

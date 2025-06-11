@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.13.4",
+    "@livekit/components-react": "^2.9.9",
+    "@livekit/components-styles": "^1.1.6",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.14",
@@ -30,6 +32,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "livekit-client": "^2.13.4",
     "lucide-react": "^0.507.0",
     "next-themes": "^0.4.6",
     "nice-grpc": "^2.1.12",

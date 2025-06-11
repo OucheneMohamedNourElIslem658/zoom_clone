@@ -1,20 +1,19 @@
-"use client"
-
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Video, Mic, MicOff, VideoOff, Users, Info } from "lucide-react"
+import { Video, Mic, MicOff, VideoOff, Info } from "lucide-react"
+import { useParams } from "react-router-dom"
+import { ActionConfiramationDialog } from "@/components/custom/action_confirmation_dialog"
+import { joinRoom } from "@/services/room"
 
 export default function RoomPreparationPage() {
     const videoRef = useRef<HTMLVideoElement>(null)
     const [isCameraOn, setIsCameraOn] = useState(true)
     const [isMicOn, setIsMicOn] = useState(true)
-    const [displayName, setDisplayName] = useState("")
     const [stream, setStream] = useState<MediaStream | null>(null)
     const [devices, setDevices] = useState<{
         videoDevices: MediaDeviceInfo[]
@@ -28,6 +27,9 @@ export default function RoomPreparationPage() {
         audioDeviceId: "",
     })
     const [permissionError, setPermissionError] = useState<string | null>(null)
+
+    const params = useParams<{ id: string }>()
+    const meetingId = params.id
 
     // Initialize media devices
     useEffect(() => {
@@ -146,15 +148,23 @@ export default function RoomPreparationPage() {
     }
 
     // Join meeting
-    const joinMeeting = () => {
-        // Here you would implement the logic to join the meeting
-        console.log("Joining meeting with settings:", {
-            name: displayName,
-            camera: isCameraOn,
-            microphone: isMicOn,
-            videoDevice: selectedDevices.videoDeviceId,
-            audioDevice: selectedDevices.audioDeviceId,
-        })
+    const handleJoinMeeting = async () => {
+        const [token, error] = await joinRoom(Number(meetingId))
+        if (error) {
+            console.error("Error joining room:", error)
+            return
+        }
+
+        const params = new URLSearchParams()
+
+        params.set("audio", isMicOn ? "true" : "false")
+        params.set("camera", isCameraOn ? "true" : "false")
+        params.set("videoDeviceId", selectedDevices.videoDeviceId || "")
+        params.set("audioDeviceId", selectedDevices.audioDeviceId || "")
+        params.set("token", token!)
+
+
+        window.location.href = `/meetings/${meetingId}/meet?${params.toString()}`
     }
 
     return (
@@ -236,18 +246,8 @@ export default function RoomPreparationPage() {
                     </Card>
 
                     {/* Settings Panel */}
-                    <Card className="lg:col-span-1 p-4">
+                    <Card className="lg:col-span-1 p-4 self-start">
                         <CardContent className="p-2 space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="display-name">Your Name</Label>
-                                <Input
-                                    id="display-name"
-                                    placeholder="Enter your name"
-                                    value={displayName}
-                                    onChange={(e) => setDisplayName(e.target.value)}
-                                />
-                            </div>
-
                             <div className="space-y-2">
                                 <Label htmlFor="camera-select">Camera</Label>
                                 <Select
@@ -306,9 +306,17 @@ export default function RoomPreparationPage() {
                                 <Switch id="noise-cancellation" />
                             </div>
 
-                            <Button className="w-full mt-4" size="lg" onClick={joinMeeting} disabled={!displayName.trim()}>
-                                <Users className="mr-2 h-4 w-4" /> Join Meeting
-                            </Button>
+                            <ActionConfiramationDialog
+                                title="Join Meeting"
+                                description="Are you sure you want to join the meeting? Make sure your audio and video settings are correct."
+                                action={handleJoinMeeting}
+                                onCancel={() => {}}
+                                trigger={
+                                    <Button className="w-full">
+                                        Join Meeting
+                                    </Button>
+                                }
+                            />
                         </CardContent>
                     </Card>
                 </div>
