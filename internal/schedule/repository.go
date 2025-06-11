@@ -152,11 +152,13 @@ func (sr *ScheduleRepo) GetMeeting(userID string, req *schedulepb.GetMeetingRequ
 	var meeting models.Meeting
 
 	if err := sr.database.Model(&models.Meeting{}).
-		Select("meetings.id, meetings.title, meetings.description, meetings.start_time, meetings.is_cancelled, meetings.type, meetings.created_at, meetings.deleted_at"). // Exclude participants_count
+		Select("meetings.id, meetings.title, meetings.description, meetings.start_time, meetings.is_cancelled, meetings.type, meetings.created_at, meetings.deleted_at").
 		Joins("JOIN meet_participants ON meet_participants.meeting_id = meetings.id").
 		Where("meetings.id = ? AND meet_participants.user_id = ?", req.Id, userID).
-		Order("meet_participants.is_host DESC").
-		Preload("Participants").
+		Preload("Participants", func(tx *gorm.DB) *gorm.DB {
+			return tx.Joins("JOIN meet_participants ON meet_participants.user_id = users.id").
+				Order("meet_participants.is_host DESC")
+		}).
 		First(&meeting).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, status.Error(codes.NotFound, "Meeting not found")
@@ -168,6 +170,9 @@ func (sr *ScheduleRepo) GetMeeting(userID string, req *schedulepb.GetMeetingRequ
 	var others []*schedulepb.MeetParticipant
 
 	for i, p := range meeting.Participants {
+		if i == 0 {
+			continue
+		}
 		participant := &schedulepb.MeetParticipant{
 			Id:        p.ID,
 			Email:     p.Email,
@@ -175,7 +180,7 @@ func (sr *ScheduleRepo) GetMeeting(userID string, req *schedulepb.GetMeetingRequ
 			AvatarUrl: p.RawUserMetaData.AvatarURL,
 		}
 
-		if i == 0 {
+		if i == 1 {
 			host = participant
 		} else {
 			others = append(others, participant)
@@ -270,7 +275,7 @@ func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeet
 			Type:                   schedulepb.MeetingType(schedulepb.MeetingType_value[string(m.Type)]),
 			Host:                   host,
 			FirstThreeParticipants: others,
-			ParticipantsCount:      uint32(m.ParticipantsCount),
+			ParticipantsCount:      uint32(m.ParticipantsCount) - 1,
 			CurrentUserId:          userID,
 		})
 	}
