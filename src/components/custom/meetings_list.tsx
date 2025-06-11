@@ -5,8 +5,9 @@ import { Badge, CalendarDays, Clock, Loader2, Video } from 'lucide-react';
 import { Meeting, SearchMeetingsRequest_MeetingCategory } from '@/api/pb/schedule';
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { Button } from '../ui/button';
-import { getMeetings } from '@/services/schedule'
+import { getMeetings, updateMeeting } from '@/services/schedule'
 import UpdateMeetingDialog from './update_meeting_dialog';
+import { ActionConfiramationDialog } from './action_confirmation_dialog';
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString("en-US", {
@@ -25,7 +26,7 @@ function formatDate(date: Date) {
   })
 }
 
-function MeetingCard({ meeting } : { meeting : Meeting}) {
+function MeetingCard({ meeting, onUpdate } : { meeting : Meeting, onUpdate: () => void }) {
   const isPast = meeting.startTime!.getTime() < new Date().getTime();
   const isNow =
     new Date().getTime() === meeting.startTime!.getTime()
@@ -36,7 +37,7 @@ function MeetingCard({ meeting } : { meeting : Meeting}) {
       <div className="flex flex-col md:flex-row justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <h3 className="font-medium text-lg">{meeting.title}</h3>
+            <h3 className={`font-medium text-lg ${meeting.isCancelled ? "line-through text-destructive" : ""}`}>{meeting.title}</h3>
             {isNow && <Badge className="bg-green-500">Now</Badge>}
           </div>
             <p className="text-muted-foreground">{meeting.description}</p>
@@ -87,13 +88,31 @@ function MeetingCard({ meeting } : { meeting : Meeting}) {
                 Meeting Notes
               </Button>
             </>
-          ) : (
+          ) : meeting.currentuserId == meeting.host?.id && !meeting.isCancelled && (
             <>
-              {meeting.currentuserId == meeting.host?.id && (<UpdateMeetingDialog meetingID={meeting.id}/>)}
+              <UpdateMeetingDialog 
+                meetingID={meeting.id}
+                onUpdate={onUpdate}
+              />
               <Button size="sm" className="gap-1">
-                <Video className="h-4 w-4" />
-                {isNow ? "Join Now" : "Join"}
+                <Video/>
+                Join
               </Button>
+              <ActionConfiramationDialog
+                title='Cancel Meeting'
+                description='Are you sure you want to cancel this meeting? This action cannot be undone.'
+                onCancel={() => {}}
+                action={async () => {
+                  await updateMeeting({
+                    id: meeting.id,
+                    isCanceled: true,
+                  });
+                  onUpdate();
+                }}
+                trigger={
+                  <Button size="sm" className="gap-1" variant={"destructive"}>Cancel</Button>
+                }
+              />
             </>
           )}
         </div>
@@ -111,6 +130,7 @@ const MeetingsList = (props: MeetingsListProps) => {
   const [loading, setLoading] = React.useState(false);
   const [hasMore, setHasMore] = React.useState(true);
   const [meetings, setMeetings] = React.useState<Meeting[]>([]);
+  const [refreshCounter, setRefreshCounter] = React.useState(0);
   const prevCategory = React.useRef(props.category);
   const prevQuery = React.useRef(props.searchQuery);
 
@@ -126,6 +146,12 @@ const MeetingsList = (props: MeetingsListProps) => {
       prevQuery.current = props.searchQuery;
     }
   }, [props.category, props.searchQuery]);
+
+  // Refetch meetings when refreshCounter changes
+  React.useEffect(() => {
+    setMeetings([]);
+    setHasMore(true);
+  }, [refreshCounter]);
 
   const next = async () => {
     if (loading || !hasMore) return;
@@ -150,10 +176,15 @@ const MeetingsList = (props: MeetingsListProps) => {
     }, 800);
   };
 
+  // Increment refreshCounter when onUpdate is triggered
+  const handleUpdate = () => {
+    setRefreshCounter((c) => c + 1);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {meetings.map((meeting) => (
-        <MeetingCard key={meeting.id} meeting={meeting} />
+        <MeetingCard key={meeting.id} meeting={meeting} onUpdate={handleUpdate} />
       ))}
       <InfiniteScroll hasMore={hasMore} isLoading={loading} next={next} threshold={1}>
         {hasMore && (

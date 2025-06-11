@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
-import { Video, Plus } from "lucide-react"
+import { Video } from "lucide-react"
 import { useCallback } from "react"
 import { DialogTrigger } from "@/components/ui/dialog"
 import { Meeting, MeetingType } from "@/api/pb/schedule"
@@ -29,13 +29,20 @@ const Loader = () => (
     </div>
 )
 
-const UpdateMeetingDialog = ({ meetingID }: { meetingID: number }) => {
+const UpdateMeetingDialog = ({
+    meetingID,
+    onUpdate,
+}: {
+    meetingID: number
+    onUpdate?: () => void
+}) => {
     const [isOpen, setIsOpen] = useState(false)
     const [err, setError] = useState<string | null>(null)
     const [validationViolations, setValidationViolations] = useState<string[]>([])
     const [selectedParticipantsIDs, setSelectedParticipantsIDs] = useState<string[]>([])
     const [meeting, setMeeting] = useState<Meeting | null>(null)
     const [loading, setLoading] = useState(false)
+    const [isUpdating, setIsUpdating] = useState(false)
     const initialMeetingRef = useRef<Meeting | null>(null)
 
     // Fetch meeting data
@@ -101,14 +108,15 @@ const UpdateMeetingDialog = ({ meetingID }: { meetingID: number }) => {
         const [hour, minute] = timeStr.split(":").map(Number)
         let startTimeDate = new Date(Date.UTC(year, month - 1, day, hour, minute))
         startTimeDate = new Date(startTimeDate.getTime() + 24 * 60 * 60 * 1000)
-        
 
+        setIsUpdating(true)
         const [response, error] = await updateMeeting({
             id: meetingID,
             newTitle: meeting.title,
             newDescription: meeting.description,
             newParticipantsIDs: selectedParticipantsIDs,
             newType: meeting.type as MeetingType,
+            setIsparticipantidsempty: selectedParticipantsIDs.length === 0,
         })
 
         if (error && error.extra) {
@@ -134,13 +142,16 @@ const UpdateMeetingDialog = ({ meetingID }: { meetingID: number }) => {
         if (response) {
             setIsOpen(false)
             setSelectedParticipantsIDs([])
+            if (onUpdate) onUpdate()
         }
+
+        setIsUpdating(false)
     }
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogTrigger asChild>
-                <Button variant={"outline"} className="whitespace-nowrap">
+                <Button variant={"outline"} className="whitespace-nowrap" size={"sm"}>
                     Edit
                 </Button>
             </DialogTrigger>
@@ -173,10 +184,10 @@ const UpdateMeetingDialog = ({ meetingID }: { meetingID: number }) => {
                         <ErrorCard err={err} validationViolations={validationViolations} setError={setError} />
                         <Separator />
                         <DialogFooter className="flex-col sm:flex-row gap-2">
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto" disabled={isUpdating}>
                                 Cancel
                             </Button>
-                            <Button type="submit" className="w-full sm:w-auto" disabled={!isFormChanged}>
+                            <Button type="submit" className="w-full sm:w-auto" disabled={!isFormChanged || isUpdating}>
                                 <Video className="w-4 h-4 mr-2" />
                                 Update Meeting
                             </Button>

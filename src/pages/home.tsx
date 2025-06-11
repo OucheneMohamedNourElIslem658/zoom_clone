@@ -47,7 +47,7 @@ export default function HomePage() {
 
         <div className="space-y-6">
           <Tabs defaultValue="upcoming" className="w-full">
-            <TabsList className="grid grid-cols-3 mb-6 sticky top-3 z-10">
+            <TabsList className="grid grid-cols-3 mb-4 sticky top-3 z-10">
               <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               <TabsTrigger value="past">Past</TabsTrigger>
               <TabsTrigger value="all">All Meetings</TabsTrigger>
