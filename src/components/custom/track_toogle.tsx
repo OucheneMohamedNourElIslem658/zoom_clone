@@ -1,7 +1,6 @@
 import { useTrackToggle } from "@livekit/components-react";
 import { Track, type AudioCaptureOptions, type ScreenShareCaptureOptions, type TrackPublishOptions, type VideoCaptureOptions } from "livekit-client";
 import { forwardRef, useEffect, useState } from "react";
-import { Button } from "../ui/button";
 import { Camera, CameraOff, Mic, MicOff, ScreenShare, ScreenShareOff } from "lucide-react";
 
 type ToggleSource = Exclude<

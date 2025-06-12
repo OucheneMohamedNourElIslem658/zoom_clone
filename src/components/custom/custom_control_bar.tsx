@@ -1,21 +1,31 @@
-import { ChatIcon, ChatToggle, LeaveIcon, MediaDeviceMenu, StartMediaButton, useConnectionState, useLocalParticipantPermissions, useMaybeLayoutContext, usePersistentUserChoices, useRoomContext } from "@livekit/components-react";
+import { ChatIcon, ChatToggle, MediaDeviceMenu, useConnectionState, useLocalParticipantPermissions, useMaybeLayoutContext, usePersistentUserChoices, useRoomContext } from "@livekit/components-react";
 import { ConnectionState, Room, Track } from "livekit-client";
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import { CustomTrackToggle } from "./track_toogle";
 import { Button } from "../ui/button";
 import { mergeProps } from "./merge_props";
-import { LogOut, MessageSquare, PhoneOff } from "lucide-react";
+import { PhoneOff } from "lucide-react";
 
 /** @public */
 export interface CustomControlBarProps extends React.HTMLAttributes<HTMLDivElement> {
   onDeviceError?: (error: { source: Track.Source; error: Error }) => void;
   variation?: 'minimal' | 'verbose' | 'textOnly';
   saveUserChoices?: boolean;
+  initialState: {
+    isCameraOn: boolean
+    isAudioOn: boolean
+    camerDeviceId?: string
+    audioDeviceId?: string
+  }
 }
 
 export function CustomControlBar({
   saveUserChoices = true,
   onDeviceError,
+  initialState = {
+    isCameraOn: true,
+    isAudioOn: true
+  }
 }: CustomControlBarProps) {
   let variation = "minimal";
   const controls = {
@@ -26,7 +36,7 @@ export function CustomControlBar({
     leave: true,
   }
 
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [_, setIsChatOpen] = useState(false);
   const layoutContext = useMaybeLayoutContext();
   useEffect(() => {
     if (layoutContext?.widget.state?.showChat !== undefined) {
@@ -94,10 +104,11 @@ export function CustomControlBar({
   );
 
   return (
-    <div className="flex gap-2 justify-center lk-control-bar fixed bottom-0 left-0 right-0 bg-card">
+    <div className="flex gap-2 justify-center lk-control-bar fixed bottom-0 left-0 right-0 bg-card h-[100px]">
       {visibleControls.microphone && (
         <div className="lk-button-group">
           <CustomTrackToggle
+            initialState={initialState.isAudioOn}
             source={Track.Source.Microphone}
             showIcon={showIcon}
             onChange={microphoneOnChange}
@@ -107,6 +118,7 @@ export function CustomControlBar({
           </CustomTrackToggle>
           <div className="lk-button-group-menu">
             <MediaDeviceMenu
+              initialSelection={initialState.audioDeviceId}
               kind="audioinput"
               onActiveDeviceChange={(_kind, deviceId) =>
                 saveAudioInputDeviceId(deviceId ?? 'default')
@@ -118,6 +130,7 @@ export function CustomControlBar({
       {visibleControls.camera && (
         <div className="lk-button-group">
           <CustomTrackToggle
+            initialState={initialState.isCameraOn}
             source={Track.Source.Camera}
             showIcon={showIcon}
             onChange={cameraOnChange}
@@ -127,6 +140,7 @@ export function CustomControlBar({
           </CustomTrackToggle>
           <div className="lk-button-group-menu">
             <MediaDeviceMenu
+              initialSelection={initialState.camerDeviceId}
               kind="videoinput"
               onActiveDeviceChange={(_kind, deviceId) =>
                 saveVideoInputDeviceId(deviceId ?? 'default')
@@ -147,8 +161,8 @@ export function CustomControlBar({
         </CustomTrackToggle>
       )}
       {visibleControls.chat && (
-        <ChatToggle className="h-[44px]">
-          {showIcon && <MessageSquare />}
+        <ChatToggle className="h-full">
+          {showIcon && <ChatIcon />}
           {showText && 'Chat'}
         </ChatToggle>
       )}

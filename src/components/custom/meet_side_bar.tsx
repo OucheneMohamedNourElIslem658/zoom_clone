@@ -1,13 +1,12 @@
-import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetClose, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Mic, MicOff, Video, VideoOff, MessageSquare, Users, MoreVertical, Send, X } from "lucide-react"
+import { Mic, MicOff, Video, VideoOff, MessageSquare, Users, MoreVertical, X } from "lucide-react"
+import { Chat, type ChatProps } from "@livekit/components-react"
 
 type Participant = {
   id: number
@@ -18,44 +17,20 @@ type Participant = {
   isHost: boolean
 }
 
-type ChatMessage = {
-  id: number
-  sender: string
-  message: string
-  time: string
-}
-
 interface MeetingSidebarProps {
-  participants: Participant[]
   isSidebarOpen: boolean
   onSidebarOpenChange?: (open: boolean) => void
+  chatProps: ChatProps
 }
 
-const MeetingSidebar = ({ participants, isSidebarOpen, onSidebarOpenChange }: MeetingSidebarProps) => {
-  const [newMessage, setNewMessage] = useState("")
+const participants = [
+  { id: 1, name: "Alice Johnson", avatar: "A", isMuted: false, isVideoOff: false, isHost: true },
+  { id: 2, name: "Bob Smith", avatar: "B", isMuted: true, isVideoOff: false, isHost: false },
+  { id: 3, name: "You", avatar: "Y", isMuted: false, isVideoOff: false, isHost: false },
+  { id: 4, name: "Carol Davis", avatar: "C", isMuted: false, isVideoOff: true, isHost: false },
+]
 
-  const chatMessages: ChatMessage[] = [
-    { id: 1, sender: "Alice Johnson", message: "Hello everyone!", time: "10:30 AM" },
-    { id: 2, sender: "Bob Smith", message: "Good morning! Ready for the presentation?", time: "10:31 AM" },
-    { id: 3, sender: "You", message: "Yes, let's get started", time: "10:32 AM" },
-    { id: 4, sender: "Carol Davis", message: "Can everyone see my screen?", time: "10:35 AM" },
-    { id: 1, sender: "Alice Johnson", message: "Hello everyone!", time: "10:30 AM" },
-    { id: 2, sender: "Bob Smith", message: "Good morning! Ready for the presentation?", time: "10:31 AM" },
-    { id: 3, sender: "You", message: "Yes, let's get started", time: "10:32 AM" },
-    { id: 4, sender: "Carol Davis", message: "Can everyone see my screen?", time: "10:35 AM" },
-    { id: 1, sender: "Alice Johnson", message: "Hello everyone!", time: "10:30 AM" },
-    { id: 2, sender: "Bob Smith", message: "Good morning! Ready for the presentation?", time: "10:31 AM" },
-    { id: 3, sender: "You", message: "Yes, let's get started", time: "10:32 AM" },
-    { id: 4, sender: "Carol Davis", message: "Can everyone see my screen?", time: "10:35 AM" },
-  ]
-
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      // Handle message sending logic here
-      setNewMessage("")
-    }
-  }
-
+const MeetingSidebar = ({isSidebarOpen, onSidebarOpenChange, chatProps }: MeetingSidebarProps) => {
   return (
     <Sheet open={isSidebarOpen} onOpenChange={onSidebarOpenChange}>
       <SheetContent side="right" className="w-full sm:w-96 p-0 flex flex-col [&>button:first-of-type]:hidden">
@@ -80,12 +55,11 @@ const MeetingSidebar = ({ participants, isSidebarOpen, onSidebarOpenChange }: Me
             <ParticipantsList participants={participants} />
           </TabsContent>
 
-          <TabsContent value="chat" className="flex-1 flex flex-col">
-            <ChatSection
-              messages={chatMessages}
-              newMessage={newMessage}
-              setNewMessage={setNewMessage}
-              onSendMessage={handleSendMessage}
+          <TabsContent value="chat">
+            <Chat
+              messageFormatter={chatProps.messageFormatter}
+              messageEncoder={chatProps.messageEncoder}
+              messageDecoder={ chatProps.messageDecoder}
             />
           </TabsContent>
         </Tabs>
@@ -161,79 +135,6 @@ const ParticipantCard = ({ participant }: { participant: Participant }) => {
           {participant.isHost && <DropdownMenuItem className="text-destructive">Remove from Meeting</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
-  )
-}
-
-const ChatSection = ({
-  messages,
-  newMessage,
-  setNewMessage,
-  onSendMessage,
-}: {
-  messages: ChatMessage[]
-  newMessage: string
-  setNewMessage: (message: string) => void
-  onSendMessage: () => void
-}) => {
-  return (
-    <div className="flex-1 flex flex-col">
-      <ScrollArea className="h-[calc(100vh)]">
-        <div className="flex-1 mb-[190px] px-6 flex flex-col gap-3 pt-4">
-          {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
-          ))}
-        </div>
-      </ScrollArea>
-
-      <div className="sticky bottom-0 left-0 right-0 bg-background border-t w-full p-4">
-        <div className="space-y-3">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Type a message..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    onSendMessage()
-                  }
-              }}
-              className="flex-1"
-            />
-            <Button size="sm" onClick={onSendMessage} disabled={!newMessage.trim()}>
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const ChatMessage = ({ message }: { message: ChatMessage }) => {
-  const isOwnMessage = message.sender === "You"
-
-  return (
-    <div className={`space-y-1 ${isOwnMessage ? "text-right" : "text-left"}`}>
-        <div
-            className={`flex items-center gap-2 text-xs text-muted-foreground ${
-                isOwnMessage ? "justify-end" : "justify-start"
-            }`}
-            >
-            {!isOwnMessage && <span className="font-medium">{message.sender}</span>}
-            <span>{message.time}</span>
-            {isOwnMessage && <span className="font-medium">{message.sender}</span>}
-        </div>
-
-      <div className={`inline-block max-w-[80%] ${isOwnMessage ? "ml-auto" : "mr-auto"}`}>
-        <div
-          className={`p-3 rounded-lg text-sm ${
-            isOwnMessage ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-          }`}
-        >
-          {message.message}
-        </div>
-      </div>
     </div>
   )
 }

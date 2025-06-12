@@ -13,20 +13,39 @@ import {
   FocusLayoutContainer,
   CarouselLayout,
   FocusLayout,
-  TrackToggle,
+  type MessageDecoder,
+  type MessageEncoder,
+  type MessageFormatter,
 } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { RoomEvent, Track } from "livekit-client"
 import { CustomConnectionStateToast } from "./custom_connection_state_toast";
-import { Card, CardContent } from "../ui/card";
 import { CustomControlBar } from "./custom_control_bar";
+import { Chat } from "./chat";
 
 export interface CustomVideoConferenceProps extends React.HTMLAttributes<HTMLDivElement> {
+  chatMessageFormatter?: MessageFormatter;
+  chatMessageEncoder?: MessageEncoder;
+  chatMessageDecoder?: MessageDecoder;
+  /** @alpha */
   SettingsComponent?: React.ComponentType;
+  initialState: {
+    isCameraOn: boolean;
+    isAudioOn: boolean;
+    cameraDeviceId?: string;
+    audioDeviceId?: string;
+  }
 }
 
 export function CustomVideoConference({
   SettingsComponent,
+  chatMessageFormatter,
+  chatMessageEncoder,
+  chatMessageDecoder,
+  initialState={
+    isCameraOn: true,
+    isAudioOn: true,
+  },
   ...props
 }: CustomVideoConferenceProps) {
   const [widgetState, setWidgetState] = useState<WidgetState>({
@@ -97,7 +116,7 @@ export function CustomVideoConference({
   ]);
 
   return (
-    <div className="lk-video-conference" {...props}>
+    <div className="lk-video-conference relative" {...props}>
       {true && (
         <LayoutContextProvider
           value={layoutContext}
@@ -121,8 +140,16 @@ export function CustomVideoConference({
                 </FocusLayoutContainer>
               </div>
             )}
-            <CustomControlBar />
+            <CustomControlBar
+              initialState={initialState}
+            />
           </div>
+          <Chat
+            style={{ display: widgetState.showChat ? 'grid' : 'none' }}
+            messageFormatter={chatMessageFormatter}
+            messageEncoder={chatMessageEncoder}
+            messageDecoder={chatMessageDecoder}
+          />
           {SettingsComponent && (
             <div
               className="lk-settings-menu-modal"
