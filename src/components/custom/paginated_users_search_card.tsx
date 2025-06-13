@@ -29,7 +29,7 @@ export default function PaginatedUsersSearchCard({
 
     useEffect(() => {
         setParticipants(defaultSelectedUsers)
-    }, [defaultSelectedUsers])
+    }, [])
     const [searchOpen, setSearchOpen] = useState(false)
     const [searchValue, setSearchValue] = useState("")
 

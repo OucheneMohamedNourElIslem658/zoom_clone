@@ -70,9 +70,9 @@ function MeetingCard({ meeting, onUpdate } : { meeting : Meeting, onUpdate: () =
                   </AvatarFallback>
                 </Avatar>
               ))}
-              {meeting.participantsCount > meeting.firstThreeParticipants.length && (
+              {meeting.participantsCount -1 > meeting.firstThreeParticipants.length && (
                 <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-xs font-medium">
-                  +{meeting.participantsCount - meeting.firstThreeParticipants.length}
+                  +{meeting.participantsCount - meeting.firstThreeParticipants.length - 1}
                 </div>
               )}
             </div>
