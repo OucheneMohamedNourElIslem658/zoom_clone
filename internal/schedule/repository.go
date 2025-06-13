@@ -1,6 +1,7 @@
 package schedule
 
 import (
+	"log"
 	"strings"
 
 	schedulepb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
@@ -37,8 +38,12 @@ func (sr *ScheduleRepo) CreateMeeting(hostID string, meeting *schedulepb.CreateM
 	}
 
 	if meeting.ParticipantIds != nil {
-		participants := make([]models.MeetParticipant, 0, len(meeting.ParticipantIds))
+		participants := []models.MeetParticipant{}
+
 		for _, participantId := range meeting.ParticipantIds {
+			if participantId == hostID {
+				continue
+			}
 			participants = append(participants, models.MeetParticipant{
 				UserID:    participantId,
 				MeetingID: createdMeeting.ID,
@@ -52,14 +57,6 @@ func (sr *ScheduleRepo) CreateMeeting(hostID string, meeting *schedulepb.CreateM
 			MeetingID: createdMeeting.ID,
 			IsHost:    true,
 		})
-
-		// remove host from participant list if they are already included
-		for i, participant := range participants {
-			if participant.UserID == hostID {
-				participants = append(participants[:i], participants[i+1:]...)
-				break
-			}
-		}
 
 		if err := sr.database.Create(&participants).Error; err != nil {
 			err = status.Error(codes.Internal, "Failed to create participants")
@@ -203,11 +200,13 @@ func (sr *ScheduleRepo) GetMeeting(userID string, req *schedulepb.GetMeetingRequ
 func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeetingsRequest) (*schedulepb.SearchMeetingsResponse, error) {
 	var meetings []models.Meeting
 
+	// Step 1: Base query to fetch meetings the user is part of
 	db := sr.database.Model(&models.Meeting{}).
 		Joins("JOIN meet_participants ON meet_participants.meeting_id = meetings.id").
 		Where("meet_participants.user_id = ?", userID).
-		Select("meetings.*, (SELECT COUNT(*) FROM meet_participants WHERE meet_participants.meeting_id = meetings.id) AS participants_count")
+		Select("DISTINCT meetings.*")
 
+	// Apply filters
 	if req.Query != "" {
 		query := "%" + strings.ToLower(req.Query) + "%"
 		db = db.Where("LOWER(meetings.title) LIKE ? OR LOWER(meetings.description) LIKE ?", query, query)
@@ -218,13 +217,8 @@ func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeet
 		db = db.Where("meetings.start_time > NOW()")
 	case schedulepb.SearchMeetingsRequest_PASSED:
 		db = db.Where("meetings.start_time <= NOW()")
-	case schedulepb.SearchMeetingsRequest_ALL:
-		// no filtering needed
-	default:
-		// invalid input fallback (no-op)
 	}
 
-	// Optional pagination
 	if req.LastId != nil {
 		db = db.Where("meetings.id > ?", *req.LastId)
 	}
@@ -232,39 +226,56 @@ func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeet
 		db = db.Limit(int(req.PageSize))
 	}
 
-	// Preload up to 4 participants per meeting, prioritizing the host
-	db = db.Preload("Participants", func(tx *gorm.DB) *gorm.DB {
-		return tx.
-			Joins("JOIN meet_participants ON meet_participants.user_id = users.id").
-			Order("meet_participants.is_host DESC").
-			Limit(5)
-	})
-
-	// Final query
 	if err := db.Order("meetings.id ASC").Find(&meetings).Error; err != nil {
 		return nil, status.Error(codes.Internal, "FAILED_TO_FETCH_MEETINGS")
 	}
 
-	// Transform into protobuf response
+	// Step 2: Build response, manually load participants
 	meetingResponses := make([]*schedulepb.Meeting, 0, len(meetings))
 	for _, m := range meetings {
-		var host *schedulepb.MeetParticipant
-		var others []*schedulepb.MeetParticipant
+		var participants []models.User
 
-		for i, p := range m.Participants {
-			participant := &schedulepb.MeetParticipant{
+		// Fetch up to 5 participants ordered by host first
+		err := sr.database.
+			Model(&models.User{}).
+			Joins("JOIN meet_participants ON meet_participants.user_id = users.id").
+			Where("meet_participants.meeting_id = ?", m.ID).
+			Order("meet_participants.is_host DESC").
+			Limit(5).
+			Find(&participants).Error
+		if err != nil {
+			log.Printf("Failed to fetch participants for meeting %d: %v", m.ID, err)
+			continue
+		}
+
+		var host *schedulepb.MeetParticipant
+		var otherParticipants []*schedulepb.MeetParticipant
+
+		if len(participants) > 0 {
+			host = &schedulepb.MeetParticipant{
+				Id:        participants[0].ID,
+				Email:     participants[0].Email,
+				Name:      participants[0].RawUserMetaData.Name,
+				AvatarUrl: participants[0].RawUserMetaData.AvatarURL,
+			}
+		}
+
+		for i := 1; i < len(participants) && len(otherParticipants) < 3; i++ {
+			p := participants[i]
+			if host != nil && p.ID == host.Id {
+				continue
+			}
+			otherParticipants = append(otherParticipants, &schedulepb.MeetParticipant{
 				Id:        p.ID,
 				Email:     p.Email,
 				Name:      p.RawUserMetaData.Name,
 				AvatarUrl: p.RawUserMetaData.AvatarURL,
-			}
-
-			if i == 0 || i == 1 {
-				host = participant
-			} else {
-				others = append(others, participant)
-			}
+			})
 		}
+
+		// Fetch participants count separately
+		var count int64
+		sr.database.Model(&models.MeetParticipant{}).Where("meeting_id = ?", m.ID).Count(&count)
 
 		meetingResponses = append(meetingResponses, &schedulepb.Meeting{
 			Id:                     uint32(m.ID),
@@ -274,8 +285,8 @@ func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeet
 			IsCancelled:            m.IsCancelled,
 			Type:                   schedulepb.MeetingType(schedulepb.MeetingType_value[string(m.Type)]),
 			Host:                   host,
-			FirstThreeParticipants: others,
-			ParticipantsCount:      uint32(m.ParticipantsCount) - 1,
+			FirstThreeParticipants: otherParticipants,
+			ParticipantsCount:      uint32(count),
 			CurrentUserId:          userID,
 		})
 	}

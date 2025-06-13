@@ -5,9 +5,11 @@ package room;
 option go_package = ".";
 
 import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
 
 service RoomService {
     rpc JoinRoom(JoinRoomRequest) returns (JoinRoomResponse);
+    rpc RecordRoom(RecordRoomRequest) returns (google.protobuf.Empty);
     // rpc GetRoom(GetRoomRequest) returns (Room);
 }
 
@@ -17,4 +19,12 @@ message JoinRoomRequest {
 
 message JoinRoomResponse {
     string token = 1;
+}
+
+message RecordRoomRequest {
+    uint32 meeting_id = 1 [(buf.validate.field).required = true];
+}
+
+message RecordRoomResponse {
+    string recording_url = 1;
 }

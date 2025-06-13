@@ -7,6 +7,7 @@ import (
 	pb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type RoomHandler struct {
@@ -35,4 +36,17 @@ func (s *RoomHandler) JoinRoom(ctx context.Context, req *pb.JoinRoomRequest) (*p
 	return &pb.JoinRoomResponse{
 		Token: *token,
 	}, nil
+}
+
+func (s *RoomHandler) RecordRoom(ctx context.Context, req *pb.RecordRoomRequest) (*emptypb.Empty, error) {
+	userID, ok := ctx.Value("user_id").(string)
+	if !ok || userID == "" {
+		return nil, status.Error(codes.Unauthenticated, "requester is not authenticated")
+	}
+
+	err := s.roomRepo.RecordRoom(userID, uint(req.MeetingId))
+	if err != nil {
+		return nil, err
+	}
+	return nil, status.Errorf(codes.Unimplemented, "method RecordRoom not implemented")
 }

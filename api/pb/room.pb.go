@@ -10,6 +10,7 @@ import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -110,19 +111,114 @@ func (x *JoinRoomResponse) GetToken() string {
 	return ""
 }
 
+type RecordRoomRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MeetingId     uint32                 `protobuf:"varint,1,opt,name=meeting_id,json=meetingId,proto3" json:"meeting_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecordRoomRequest) Reset() {
+	*x = RecordRoomRequest{}
+	mi := &file_room_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecordRoomRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecordRoomRequest) ProtoMessage() {}
+
+func (x *RecordRoomRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_room_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecordRoomRequest.ProtoReflect.Descriptor instead.
+func (*RecordRoomRequest) Descriptor() ([]byte, []int) {
+	return file_room_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *RecordRoomRequest) GetMeetingId() uint32 {
+	if x != nil {
+		return x.MeetingId
+	}
+	return 0
+}
+
+type RecordRoomResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RecordingUrl  string                 `protobuf:"bytes,1,opt,name=recording_url,json=recordingUrl,proto3" json:"recording_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecordRoomResponse) Reset() {
+	*x = RecordRoomResponse{}
+	mi := &file_room_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecordRoomResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecordRoomResponse) ProtoMessage() {}
+
+func (x *RecordRoomResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_room_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecordRoomResponse.ProtoReflect.Descriptor instead.
+func (*RecordRoomResponse) Descriptor() ([]byte, []int) {
+	return file_room_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *RecordRoomResponse) GetRecordingUrl() string {
+	if x != nil {
+		return x.RecordingUrl
+	}
+	return ""
+}
+
 var File_room_proto protoreflect.FileDescriptor
 
 const file_room_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"room.proto\x12\x04room\x1a\x1bbuf/validate/validate.proto\"8\n" +
+	"room.proto\x12\x04room\x1a\x1bbuf/validate/validate.proto\x1a\x1bgoogle/protobuf/empty.proto\"8\n" +
 	"\x0fJoinRoomRequest\x12%\n" +
 	"\n" +
 	"meeting_id\x18\x01 \x01(\rB\x06\xbaH\x03\xc8\x01\x01R\tmeetingId\"(\n" +
 	"\x10JoinRoomResponse\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token2H\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\":\n" +
+	"\x11RecordRoomRequest\x12%\n" +
+	"\n" +
+	"meeting_id\x18\x01 \x01(\rB\x06\xbaH\x03\xc8\x01\x01R\tmeetingId\"9\n" +
+	"\x12RecordRoomResponse\x12#\n" +
+	"\rrecording_url\x18\x01 \x01(\tR\frecordingUrl2\x87\x01\n" +
 	"\vRoomService\x129\n" +
-	"\bJoinRoom\x12\x15.room.JoinRoomRequest\x1a\x16.room.JoinRoomResponseB\x03Z\x01.b\x06proto3"
+	"\bJoinRoom\x12\x15.room.JoinRoomRequest\x1a\x16.room.JoinRoomResponse\x12=\n" +
+	"\n" +
+	"RecordRoom\x12\x17.room.RecordRoomRequest\x1a\x16.google.protobuf.EmptyB\x03Z\x01.b\x06proto3"
 
 var (
 	file_room_proto_rawDescOnce sync.Once
@@ -136,16 +232,21 @@ func file_room_proto_rawDescGZIP() []byte {
 	return file_room_proto_rawDescData
 }
 
-var file_room_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_room_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_room_proto_goTypes = []any{
-	(*JoinRoomRequest)(nil),  // 0: room.JoinRoomRequest
-	(*JoinRoomResponse)(nil), // 1: room.JoinRoomResponse
+	(*JoinRoomRequest)(nil),    // 0: room.JoinRoomRequest
+	(*JoinRoomResponse)(nil),   // 1: room.JoinRoomResponse
+	(*RecordRoomRequest)(nil),  // 2: room.RecordRoomRequest
+	(*RecordRoomResponse)(nil), // 3: room.RecordRoomResponse
+	(*emptypb.Empty)(nil),      // 4: google.protobuf.Empty
 }
 var file_room_proto_depIdxs = []int32{
 	0, // 0: room.RoomService.JoinRoom:input_type -> room.JoinRoomRequest
-	1, // 1: room.RoomService.JoinRoom:output_type -> room.JoinRoomResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	2, // 1: room.RoomService.RecordRoom:input_type -> room.RecordRoomRequest
+	1, // 2: room.RoomService.JoinRoom:output_type -> room.JoinRoomResponse
+	4, // 3: room.RoomService.RecordRoom:output_type -> google.protobuf.Empty
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -162,7 +263,7 @@ func file_room_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_room_proto_rawDesc), len(file_room_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

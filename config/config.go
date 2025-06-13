@@ -22,6 +22,11 @@ type Config struct {
 	LiveKitAPIKey     string
 	LiveKitAPISecret  string
 	LiveKitURL        string
+	StorageAccessKey  string
+	StorageSecretKey  string
+	StorageEndpoint   string
+	StorageBucketName string
+	StorageRegion     string
 }
 
 func Load() *Config {
@@ -42,6 +47,11 @@ func Load() *Config {
 		LiveKitAPIKey:     os.Getenv("LIVEKIT_API_KEY"),
 		LiveKitAPISecret:  os.Getenv("LIVEKIT_API_SECRET"),
 		LiveKitURL:        os.Getenv("LIVEKIT_URL"),
+		StorageAccessKey:  os.Getenv("STORAGE_ACCESS_KEY"),
+		StorageSecretKey:  os.Getenv("STORAGE_SECRET_KEY"),
+		StorageEndpoint:   os.Getenv("STORAGE_ENDPOINT"),
+		StorageBucketName: os.Getenv("STORAGE_BUCKET_NAME"),
+		StorageRegion:     os.Getenv("STORAGE_REGION"),
 	}
 }
 
