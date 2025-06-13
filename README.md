@@ -74,9 +74,8 @@ To get a local copy up and running, follow these simple steps:
     grpcwebproxy --backend_addr=localhost:50051 --allowed_origins=http://localhost:5173 --allowed_headers=authorization,x-user-agent,x-grpc-web,content-type --run_http_server=true --server_http_debug_port=8080 --run_tls_server=false
     ```
   
-/**
-  * This function/class/module is part of an entirely open source project.
-  * All technologies and dependencies used in this project are open source.
-  */
+**Note:**
+* This function/class/module is part of an entirely open source project.
+* All technologies and dependencies used in this project are open source.
 
 Now you can access the app at [http://localhost:5173](http://localhost:5173) and begin developing!
