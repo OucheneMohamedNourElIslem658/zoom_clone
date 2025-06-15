@@ -12,13 +12,13 @@ Our Zoom Clone offers a comprehensive suite of features to enhance your meeting 
 * **Screen Sharing:** Share your desktop or specific applications for presentations and collaborative work.
 * **In-Meeting Messaging:** Communicate with participants via text chat during active meetings.
 * **Customizable Video Streaming Settings:** Adjust video quality and other settings to optimize your experience.
+* **Meeting Recording:** Capture and save your meetings for future reference and review.
 
 ### Currently Under Development
 
 I am actively expanding the functionality of the app with the following features:
 
 * **Join Meetings via Shared Links:** Effortlessly join meetings with a simple click on a shared URL.
-* **Meeting Recording:** Capture and save your meetings for future reference and review.
 
 ### Soon to be Added
 * **AI-Powered Collaboration:** Integration with [Ollama](https://ollama.com/) will provide intelligent assistance during meetings, generating talking points and suggestions to foster more productive discussions.
