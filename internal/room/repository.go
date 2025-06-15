@@ -3,7 +3,7 @@ package room
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/config"
@@ -11,10 +11,10 @@ import (
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/database"
 	"github.com/livekit/protocol/auth"
 	"github.com/livekit/protocol/livekit"
+	lksdk "github.com/livekit/server-sdk-go/v2"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
-	lksdk "github.com/livekit/server-sdk-go/v2"
 )
 
 type RoomRepository struct {
@@ -27,7 +27,7 @@ func NewRoomRepository() *RoomRepository {
 	}
 }
 
-func (r *RoomRepository) JoinRoom(userID string, meetingID uint) (token *string, apiErr *status.Status) {
+func (r *RoomRepository) JoinRoom(userID string, meetingID string) (token *string, apiErr *status.Status) {
 	var participant models.MeetParticipant
 	err := r.database.
 		Where("user_id = ? AND meeting_id = ?", userID, meetingID).
@@ -54,9 +54,10 @@ func (r *RoomRepository) JoinRoom(userID string, meetingID uint) (token *string,
 	)
 
 	grant := &auth.VideoGrant{
-		RoomAdmin: participant.IsHost,
-		RoomJoin:  !participant.IsBanned,
-		Room:      string(meetingID),
+		RoomAdmin:  participant.IsHost,
+		RoomJoin:   !participant.IsBanned,
+		Room:       meetingID,
+		RoomRecord: true,
 	}
 
 	userMetaData := map[string]any{
@@ -98,39 +99,57 @@ func (c *EgressHttpClient) Do(req *http.Request) (*http.Response, error) {
 	return c.HTTPClient.Do(req)
 }
 
-func (r *RoomRepository) RecordRoom(userID string, meetingID uint) (error) {
-	// Verify if user is participant
-	var isParticipant bool
+func (r *RoomRepository) RecordRoom(userID string, meetingID string) error {
+	var participant models.MeetParticipant
 	err := r.database.Model(&models.MeetParticipant{}).
 		Where("meeting_id = ? AND user_id = ?", meetingID, userID).
-		Select("COUNT(*) > 0").
-		Scan(&isParticipant).
+		Preload("Meeting").
+		First(&participant).
 		Error
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return status.Error(codes.NotFound, "user is not a participant of this meeting")
+		}
 		return status.Error(codes.Internal, "failed to check user participation: "+err.Error())
-	}
-
-	if !isParticipant {
-		return status.Error(codes.PermissionDenied, "user is not a participant of this meeting")
 	}
 
 	config := config.Load()
 
-	// Start Recording:
+	client := lksdk.NewRoomServiceClient(
+		config.LiveKitURL,
+	    config.LiveKitAPIKey,
+		config.LiveKitAPISecret,
+	)
+
+	existingRooms, err := client.ListRooms(context.Background(), &livekit.ListRoomsRequest{
+		Names:  []string{meetingID},
+	})
+
+	if err != nil {
+		return status.Error(codes.Internal, "failed to list rooms: "+err.Error())
+	}
+	
+	if len(existingRooms.Rooms) == 0 {
+		return status.Error(codes.NotFound, "room does not exist")
+	}			
+
 	req := &livekit.RoomCompositeEgressRequest{
-		RoomName:      string(meetingID),
-		Layout:        "speaker",
-		AudioOnly:     false,
-		CustomBaseUrl: "https://my-custom-template.com",
+		RoomName:  string(meetingID),
+		Layout:    "speaker",
+		AudioOnly: false,
 		Options: &livekit.RoomCompositeEgressRequest_Preset{
 			Preset: livekit.EncodingOptionsPreset_PORTRAIT_H264_1080P_30,
 		},
 	}
+
+	folderPath := "rooms/" +  meetingID + "/"
+	meetTitle := participant.Meeting.Title
+
 	req.SegmentOutputs = []*livekit.SegmentedFileOutput{
 		{
-			FilenamePrefix:   "my-output",
-			PlaylistName:     "my-output.m3u8",
-			LivePlaylistName: "my-output-live.m3u8",
+			FilenamePrefix:   folderPath + meetTitle,
+			PlaylistName:     folderPath + fmt.Sprintf("%v.mp4", meetTitle),
+			LivePlaylistName: folderPath + fmt.Sprintf("%v-live.mp4", meetTitle),
 			SegmentDuration:  2,
 			Output: &livekit.SegmentedFileOutput_S3{
 				S3: &livekit.S3Upload{
@@ -150,23 +169,22 @@ func (r *RoomRepository) RecordRoom(userID string, meetingID uint) (error) {
 		config.LiveKitAPISecret,
 	)
 
-	log.Println("Starting room recording for meeting ID:", meetingID)
-
 	resp, err := egressClient.StartRoomCompositeEgress(context.Background(), req)
-	log.Println("Egress response:", err)
 	if err != nil {
 		return status.Error(codes.Internal, "failed to start room recording: "+err.Error())
 	}
 
-	err = r.database.Model(&models.MeetParticipant{}).
-	    Where("meeting_id = ? AND user_id = ?", meetingID, userID).
-		Update("record_url", resp.EgressId).
-		Error
+	participant.EgressIDs = append(participant.EgressIDs, resp.EgressId)
+
+	err = r.database.Save(&participant).Error
+	if err != nil {
+		return status.Error(codes.Internal, "failed to update participant egress IDs: "+err.Error())
+	}
 
 	if err != nil {
-		// Stop Egress: 
+		// Stop Egress:
 		stopReq := &livekit.StopEgressRequest{
-			EgressId:  resp.EgressId,
+			EgressId: resp.EgressId,
 		}
 
 		_, err := egressClient.StopEgress(context.Background(), stopReq)
@@ -175,6 +193,46 @@ func (r *RoomRepository) RecordRoom(userID string, meetingID uint) (error) {
 		}
 
 		return status.Error(codes.Internal, "failed to update participant record URL: "+err.Error())
+	}
+
+	return nil
+}
+
+func (r *RoomRepository) StopRecording(userID string, meetingID string) (error) {
+	var participant models.MeetParticipant
+	err := r.database.Model(&models.MeetParticipant{}).
+		Where("meeting_id = ? AND user_id = ?", meetingID, userID).
+		First(&participant).
+		Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return status.Error(codes.NotFound, "user is not a participant of this meeting")
+		}
+		return status.Error(codes.Internal, "failed to check user participation: "+err.Error())
+	}
+
+	if len(participant.EgressIDs) == 0 {
+		return status.Error(codes.NotFound, "no recording found for this participant")
+	}
+
+	// stop the last egress
+	egressID := participant.EgressIDs[len(participant.EgressIDs)-1]
+	req := &livekit.StopEgressRequest{
+		EgressId: egressID,
+	}
+
+	config := config.Load()
+
+	egressClient := lksdk.NewEgressClient(
+		config.LiveKitURL,
+		config.LiveKitAPIKey,
+		config.LiveKitAPISecret,
+	)
+
+	 _, err = egressClient.StopEgress(context.Background(), req)
+	if err != nil {
+		return status.Error(codes.Internal, "failed to stop egress: "+err.Error())
 	}
 
 	return nil

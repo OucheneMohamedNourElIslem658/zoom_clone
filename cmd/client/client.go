@@ -37,9 +37,7 @@ func main() {
 		EmailQuery: title,
 	})
 	if err != nil {
-		log.Println(err)
 		st, _ := status.FromError(err)
-		log.Println("Validation errors:")
 		for _, detail := range st.Details() {
 			if br, ok := detail.(*errdetails.BadRequest); ok {
 				for _, fv := range br.GetFieldViolations() {

@@ -2,7 +2,6 @@ package schedule
 
 import (
 	"context"
-	"log"
 
 	pb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
 	"google.golang.org/grpc/codes"
@@ -23,7 +22,6 @@ func NewScheduleHandler() *ScheduleHandler {
 
 func (sh *ScheduleHandler) CreateMeeting(ctx context.Context, req *pb.CreateMeetingRequest) (*emptypb.Empty, error) {
 	userID, ok := ctx.Value("user_id").(string)
-	log.Println("userID:", userID)
 	if !ok {
 		return nil, status.Errorf(codes.Unauthenticated, "Requester is not authenticated")
 	}

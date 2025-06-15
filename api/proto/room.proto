@@ -10,11 +10,12 @@ import "google/protobuf/empty.proto";
 service RoomService {
     rpc JoinRoom(JoinRoomRequest) returns (JoinRoomResponse);
     rpc RecordRoom(RecordRoomRequest) returns (google.protobuf.Empty);
+    rpc StopRecording(RecordRoomRequest) returns (google.protobuf.Empty);
     // rpc GetRoom(GetRoomRequest) returns (Room);
 }
 
 message JoinRoomRequest {
-    uint32 meeting_id = 1 [(buf.validate.field).required = true];
+    string meeting_id = 1 [(buf.validate.field).required = true];
 }
 
 message JoinRoomResponse {
@@ -22,7 +23,7 @@ message JoinRoomResponse {
 }
 
 message RecordRoomRequest {
-    uint32 meeting_id = 1 [(buf.validate.field).required = true];
+    string meeting_id = 1 [(buf.validate.field).required = true];
 }
 
 message RecordRoomResponse {

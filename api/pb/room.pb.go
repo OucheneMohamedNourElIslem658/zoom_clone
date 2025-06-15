@@ -25,7 +25,7 @@ const (
 
 type JoinRoomRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MeetingId     uint32                 `protobuf:"varint,1,opt,name=meeting_id,json=meetingId,proto3" json:"meeting_id,omitempty"`
+	MeetingId     string                 `protobuf:"bytes,1,opt,name=meeting_id,json=meetingId,proto3" json:"meeting_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,11 +60,11 @@ func (*JoinRoomRequest) Descriptor() ([]byte, []int) {
 	return file_room_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *JoinRoomRequest) GetMeetingId() uint32 {
+func (x *JoinRoomRequest) GetMeetingId() string {
 	if x != nil {
 		return x.MeetingId
 	}
-	return 0
+	return ""
 }
 
 type JoinRoomResponse struct {
@@ -113,7 +113,7 @@ func (x *JoinRoomResponse) GetToken() string {
 
 type RecordRoomRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MeetingId     uint32                 `protobuf:"varint,1,opt,name=meeting_id,json=meetingId,proto3" json:"meeting_id,omitempty"`
+	MeetingId     string                 `protobuf:"bytes,1,opt,name=meeting_id,json=meetingId,proto3" json:"meeting_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -148,11 +148,11 @@ func (*RecordRoomRequest) Descriptor() ([]byte, []int) {
 	return file_room_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *RecordRoomRequest) GetMeetingId() uint32 {
+func (x *RecordRoomRequest) GetMeetingId() string {
 	if x != nil {
 		return x.MeetingId
 	}
-	return 0
+	return ""
 }
 
 type RecordRoomResponse struct {
@@ -207,18 +207,19 @@ const file_room_proto_rawDesc = "" +
 	"room.proto\x12\x04room\x1a\x1bbuf/validate/validate.proto\x1a\x1bgoogle/protobuf/empty.proto\"8\n" +
 	"\x0fJoinRoomRequest\x12%\n" +
 	"\n" +
-	"meeting_id\x18\x01 \x01(\rB\x06\xbaH\x03\xc8\x01\x01R\tmeetingId\"(\n" +
+	"meeting_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tmeetingId\"(\n" +
 	"\x10JoinRoomResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\":\n" +
 	"\x11RecordRoomRequest\x12%\n" +
 	"\n" +
-	"meeting_id\x18\x01 \x01(\rB\x06\xbaH\x03\xc8\x01\x01R\tmeetingId\"9\n" +
+	"meeting_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tmeetingId\"9\n" +
 	"\x12RecordRoomResponse\x12#\n" +
-	"\rrecording_url\x18\x01 \x01(\tR\frecordingUrl2\x87\x01\n" +
+	"\rrecording_url\x18\x01 \x01(\tR\frecordingUrl2\xc9\x01\n" +
 	"\vRoomService\x129\n" +
 	"\bJoinRoom\x12\x15.room.JoinRoomRequest\x1a\x16.room.JoinRoomResponse\x12=\n" +
 	"\n" +
-	"RecordRoom\x12\x17.room.RecordRoomRequest\x1a\x16.google.protobuf.EmptyB\x03Z\x01.b\x06proto3"
+	"RecordRoom\x12\x17.room.RecordRoomRequest\x1a\x16.google.protobuf.Empty\x12@\n" +
+	"\rStopRecording\x12\x17.room.RecordRoomRequest\x1a\x16.google.protobuf.EmptyB\x03Z\x01.b\x06proto3"
 
 var (
 	file_room_proto_rawDescOnce sync.Once
@@ -243,10 +244,12 @@ var file_room_proto_goTypes = []any{
 var file_room_proto_depIdxs = []int32{
 	0, // 0: room.RoomService.JoinRoom:input_type -> room.JoinRoomRequest
 	2, // 1: room.RoomService.RecordRoom:input_type -> room.RecordRoomRequest
-	1, // 2: room.RoomService.JoinRoom:output_type -> room.JoinRoomResponse
-	4, // 3: room.RoomService.RecordRoom:output_type -> google.protobuf.Empty
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	2, // 2: room.RoomService.StopRecording:input_type -> room.RecordRoomRequest
+	1, // 3: room.RoomService.JoinRoom:output_type -> room.JoinRoomResponse
+	4, // 4: room.RoomService.RecordRoom:output_type -> google.protobuf.Empty
+	4, // 5: room.RoomService.StopRecording:output_type -> google.protobuf.Empty
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

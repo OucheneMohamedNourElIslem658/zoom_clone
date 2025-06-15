@@ -1,7 +1,6 @@
 package schedule
 
 import (
-	"log"
 	"strings"
 
 	schedulepb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
@@ -244,7 +243,6 @@ func (sr *ScheduleRepo) GetAllMeetings(userID string, req *schedulepb.SearchMeet
 			Limit(5).
 			Find(&participants).Error
 		if err != nil {
-			log.Printf("Failed to fetch participants for meeting %d: %v", m.ID, err)
 			continue
 		}
 
