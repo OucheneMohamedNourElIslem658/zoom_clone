@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/config"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/models"
@@ -142,16 +144,32 @@ func (r *RoomRepository) RecordRoom(userID string, meetingID string) error {
 		},
 	}
 
-	folderPath := "rooms/" +  meetingID + "/"
+	// Use a unique folder for each recording by including a timestamp
+	folderPath := fmt.Sprintf("rooms/%s/%s/%d/", meetingID, userID, time.Now().UnixNano())
 	meetTitle := participant.Meeting.Title
 
-	req.SegmentOutputs = []*livekit.SegmentedFileOutput{
+	// req.SegmentOutputs = []*livekit.SegmentedFileOutput{
+	// 	{
+	// 		FilenamePrefix:   folderPath + meetTitle,
+	// 		PlaylistName:     folderPath + fmt.Sprintf("%v.mp4", meetTitle),
+	// 		LivePlaylistName: folderPath + fmt.Sprintf("%v-live.mp4", meetTitle),
+	// 		SegmentDuration:  2,
+	// 		Output: &livekit.SegmentedFileOutput_S3{
+	// 			S3: &livekit.S3Upload{
+	// 				AccessKey:      config.StorageAccessKey,
+	// 				Secret:         config.StorageSecretKey,
+	// 				Endpoint:       config.StorageEndpoint,
+	// 				Bucket:         config.StorageBucketName,
+	// 				ForcePathStyle: true,
+	// 			},
+	// 		},
+	// 	},
+	// }
+
+	req.FileOutputs = []*livekit.EncodedFileOutput{
 		{
-			FilenamePrefix:   folderPath + meetTitle,
-			PlaylistName:     folderPath + fmt.Sprintf("%v.mp4", meetTitle),
-			LivePlaylistName: folderPath + fmt.Sprintf("%v-live.mp4", meetTitle),
-			SegmentDuration:  2,
-			Output: &livekit.SegmentedFileOutput_S3{
+			Filepath:  folderPath + meetTitle + ".mp4",
+			Output: &livekit.EncodedFileOutput_S3{
 				S3: &livekit.S3Upload{
 					AccessKey:      config.StorageAccessKey,
 					Secret:         config.StorageSecretKey,
@@ -162,6 +180,7 @@ func (r *RoomRepository) RecordRoom(userID string, meetingID string) error {
 			},
 		},
 	}
+
 
 	egressClient := lksdk.NewEgressClient(
 		config.LiveKitURL,
@@ -176,7 +195,10 @@ func (r *RoomRepository) RecordRoom(userID string, meetingID string) error {
 
 	participant.EgressIDs = append(participant.EgressIDs, resp.EgressId)
 
-	err = r.database.Save(&participant).Error
+	err = r.database.Model(&models.MeetParticipant{}).
+		Where("meeting_id = ? AND user_id = ?", meetingID, userID).
+		Save(&participant).
+		Error
 	if err != nil {
 		return status.Error(codes.Internal, "failed to update participant egress IDs: "+err.Error())
 	}
@@ -218,6 +240,7 @@ func (r *RoomRepository) StopRecording(userID string, meetingID string) (error) 
 
 	// stop the last egress
 	egressID := participant.EgressIDs[len(participant.EgressIDs)-1]
+	log.Println(egressID)
 	req := &livekit.StopEgressRequest{
 		EgressId: egressID,
 	}

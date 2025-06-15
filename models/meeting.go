@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type MeetingType string
@@ -29,13 +31,13 @@ func (Meeting) TableName() string {
 }
 
 type MeetParticipant struct {
-	MeetingID uint     `json:"meeting_id"`
-	UserID    string   `gorm:"type:uuid" json:"meet_space_profile_id"`
-	User      *User    `json:"user,omitempty" gorm:"foreignKey:UserID;references:ID"`
-	Meeting   *Meeting `json:"meeting,omitempty" gorm:"foreignKey:MeetingID;references:ID"`
-	EgressIDs []string `json:"egress_ids,omitempty" gorm:"type:text[]"`
-	IsBanned  bool     `json:"is_banned"`
-	IsHost    bool     `json:"is_host"`
+	MeetingID uint           `json:"meeting_id"`
+	UserID    string         `gorm:"type:uuid" json:"meet_space_profile_id"`
+	User      *User          `json:"user,omitempty" gorm:"foreignKey:UserID;references:ID"`
+	Meeting   *Meeting       `json:"meeting,omitempty" gorm:"foreignKey:MeetingID;references:ID"`
+	EgressIDs pq.StringArray `json:"egress_ids,omitempty" gorm:"type:text[]"`
+	IsBanned  bool           `json:"is_banned"`
+	IsHost    bool           `json:"is_host"`
 }
 
 func (MeetParticipant) TableName() string {
