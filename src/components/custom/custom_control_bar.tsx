@@ -7,6 +7,7 @@ import { mergeProps } from "./merge_props";
 import { PhoneOff } from "lucide-react";
 import { RecordingSwitcher } from "./recording_switcher";
 import { recordRoom, stopRecordingRoom } from "@/services/room";
+import { toast } from "sonner";
 
 /** @public */
 export interface CustomControlBarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -108,13 +109,25 @@ export function CustomControlBar({
   );
 
   // handle the onToggle(isRecording: boolean) function for the RecordingSwitcher
-  const handleRecordingToggle = useCallback(async (isRecording: boolean) => {
+  const handleRecordingToggle = async (isRecording: boolean) => {
     if (isRecording) {
-      await recordRoom(meetingID)
+      let err = await recordRoom(meetingID)
+      if (err) {
+        console.error("Error starting recording:", err);
+        toast.error("Failed to start recording: " + err.message);
+      } else {
+        toast.success("Recording started successfully.");
+      }
     } else {
-      await stopRecordingRoom(meetingID)
+      let err = await stopRecordingRoom(meetingID)
+      if (err) {
+        console.error("Error stopping recording:", err);
+        toast.error("Failed to stop recording: " + err.message);
+      } else {
+        toast.success("Recording stopped successfully.");
+      }
     }
-  }, []);
+  };
 
 
   return (
@@ -174,7 +187,7 @@ export function CustomControlBar({
           {showText && (isScreenShareEnabled ? 'Stop screen share' : 'Share screen')}
         </CustomTrackToggle>
       )}
-      <RecordingSwitcher onToggle={handleRecordingToggle}/>
+      <RecordingSwitcher onToggle={async (isRecording) => await handleRecordingToggle(isRecording)}/>
       {visibleControls.chat && (
         <ChatToggle className="h-full">
           {showIcon && <ChatIcon />}

@@ -111,6 +111,7 @@ export function CustomVideoConference({
     focusTrack?.publication?.trackSid,
     tracks,
   ]);
+  
 
   return (
     <div className="lk-video-conference relative" {...props}>

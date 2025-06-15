@@ -4,7 +4,7 @@ import { Circle, Square } from "lucide-react"
 import { toast } from "sonner"
 
 interface RecordingSwitcherProps {
-    onToggle?: (isRecording: boolean) => void
+    onToggle?: (isRecording: boolean) => Promise<void> | void
 }
 
 export function RecordingSwitcher({ onToggle }: RecordingSwitcherProps) {
@@ -16,7 +16,7 @@ export function RecordingSwitcher({ onToggle }: RecordingSwitcherProps) {
         try {
             if (onToggle) {
                 try {
-                    await Promise.resolve(onToggle(!isRecording))
+                    await onToggle(!isRecording)
                 } catch (error) {
                     toast.error("Failed to toggle recording: " + error)
                 }
