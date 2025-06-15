@@ -7,7 +7,7 @@ import { mergeProps } from "./merge_props";
 import { PhoneOff } from "lucide-react";
 import { RecordingSwitcher } from "./recording_switcher";
 import { recordRoom, stopRecordingRoom } from "@/services/room";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 
 /** @public */
 export interface CustomControlBarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -200,6 +200,7 @@ export function CustomControlBar({
           {showText && 'Leave'}
         </DisconnectButton>
       )}
+      <Toaster/>
     </div>
   );
 }

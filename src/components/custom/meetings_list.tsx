@@ -9,6 +9,8 @@ import { getMeetings, updateMeeting } from '@/services/schedule'
 import UpdateMeetingDialog from './update_meeting_dialog';
 import { ActionConfiramationDialog } from './action_confirmation_dialog';
 import { Link } from 'react-router-dom';
+import { getRecodrings } from '@/services/room';
+import { toast, Toaster } from 'sonner';
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString("en-US", {
@@ -33,6 +35,23 @@ function MeetingCard({ meeting, onUpdate } : { meeting : Meeting, onUpdate: () =
     new Date().getTime() === meeting.startTime!.getTime()
 
   const authorizedToEdit = meeting.currentuserId == meeting.host?.id && !meeting.isCancelled;
+
+  const handleGetRecordings = async () => {
+    const [urls, error] = await getRecodrings(meeting.id.toString());
+
+    if (error) {
+      toast.error("Failed to fetch recordings: " + error.message);
+      return;
+    }
+
+    if (urls && urls.length > 0) {
+      urls.forEach(url => {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      });
+    } else {
+      alert("No recordings found for this meeting.");
+    }
+  }
   
 
   return (
@@ -84,7 +103,9 @@ function MeetingCard({ meeting, onUpdate } : { meeting : Meeting, onUpdate: () =
         <div className="flex items-center gap-2 self-end md:self-center">
           {isPast ? (
             <>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={async () => {
+                await handleGetRecordings();
+              }}>
                 View Recording
               </Button>
               <Button variant="outline" size="sm">
@@ -122,6 +143,7 @@ function MeetingCard({ meeting, onUpdate } : { meeting : Meeting, onUpdate: () =
           }
         </div>
       </div>
+    <Toaster/>
     </div>
   )
 }

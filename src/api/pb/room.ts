@@ -27,6 +27,14 @@ export interface RecordRoomResponse {
   recordingUrl: string;
 }
 
+export interface GetRecordingRequest {
+  meetingId: string;
+}
+
+export interface GetRecordingResponse {
+  urls: string[];
+}
+
 function createBaseJoinRoomRequest(): JoinRoomRequest {
   return { meetingId: "" };
 }
@@ -259,6 +267,122 @@ export const RecordRoomResponse: MessageFns<RecordRoomResponse> = {
   },
 };
 
+function createBaseGetRecordingRequest(): GetRecordingRequest {
+  return { meetingId: "" };
+}
+
+export const GetRecordingRequest: MessageFns<GetRecordingRequest> = {
+  encode(message: GetRecordingRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.meetingId !== "") {
+      writer.uint32(10).string(message.meetingId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetRecordingRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetRecordingRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.meetingId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetRecordingRequest {
+    return { meetingId: isSet(object.meetingId) ? globalThis.String(object.meetingId) : "" };
+  },
+
+  toJSON(message: GetRecordingRequest): unknown {
+    const obj: any = {};
+    if (message.meetingId !== "") {
+      obj.meetingId = message.meetingId;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GetRecordingRequest>): GetRecordingRequest {
+    return GetRecordingRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetRecordingRequest>): GetRecordingRequest {
+    const message = createBaseGetRecordingRequest();
+    message.meetingId = object.meetingId ?? "";
+    return message;
+  },
+};
+
+function createBaseGetRecordingResponse(): GetRecordingResponse {
+  return { urls: [] };
+}
+
+export const GetRecordingResponse: MessageFns<GetRecordingResponse> = {
+  encode(message: GetRecordingResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.urls) {
+      writer.uint32(10).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetRecordingResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetRecordingResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.urls.push(reader.string());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetRecordingResponse {
+    return { urls: globalThis.Array.isArray(object?.urls) ? object.urls.map((e: any) => globalThis.String(e)) : [] };
+  },
+
+  toJSON(message: GetRecordingResponse): unknown {
+    const obj: any = {};
+    if (message.urls?.length) {
+      obj.urls = message.urls;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GetRecordingResponse>): GetRecordingResponse {
+    return GetRecordingResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetRecordingResponse>): GetRecordingResponse {
+    const message = createBaseGetRecordingResponse();
+    message.urls = object.urls?.map((e) => e) || [];
+    return message;
+  },
+};
+
 export type RoomServiceDefinition = typeof RoomServiceDefinition;
 export const RoomServiceDefinition = {
   name: "RoomService",
@@ -288,6 +412,15 @@ export const RoomServiceDefinition = {
       responseStream: false,
       options: {},
     },
+    /** rpc GetRoom(GetRoomRequest) returns (Room); */
+    getRecording: {
+      name: "GetRecording",
+      requestType: GetRecordingRequest,
+      requestStream: false,
+      responseType: GetRecordingResponse,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
@@ -295,12 +428,22 @@ export interface RoomServiceImplementation<CallContextExt = {}> {
   joinRoom(request: JoinRoomRequest, context: CallContext & CallContextExt): Promise<DeepPartial<JoinRoomResponse>>;
   recordRoom(request: RecordRoomRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Empty>>;
   stopRecording(request: RecordRoomRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Empty>>;
+  /** rpc GetRoom(GetRoomRequest) returns (Room); */
+  getRecording(
+    request: GetRecordingRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<GetRecordingResponse>>;
 }
 
 export interface RoomServiceClient<CallOptionsExt = {}> {
   joinRoom(request: DeepPartial<JoinRoomRequest>, options?: CallOptions & CallOptionsExt): Promise<JoinRoomResponse>;
   recordRoom(request: DeepPartial<RecordRoomRequest>, options?: CallOptions & CallOptionsExt): Promise<Empty>;
   stopRecording(request: DeepPartial<RecordRoomRequest>, options?: CallOptions & CallOptionsExt): Promise<Empty>;
+  /** rpc GetRoom(GetRoomRequest) returns (Room); */
+  getRecording(
+    request: DeepPartial<GetRecordingRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<GetRecordingResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

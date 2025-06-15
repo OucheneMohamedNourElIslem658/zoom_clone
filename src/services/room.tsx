@@ -81,3 +81,26 @@ export const stopRecordingRoom = async (meetingID: string): Promise<RichClientEr
         return error as RichClientError;
     }
 };
+
+export const getRecodrings = async (meetingID: string): Promise<[string[] | null, RichClientError | Error | null]> => {
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+        return [null, new Error("Access token is not available. Please log in.")];
+    }
+
+    let metadata: any = undefined;
+    if (accessToken) {
+        metadata = new Metadata();
+        metadata.set("Authorization", `Bearer ${accessToken}`);
+    }
+
+    try {
+        const response = await client.getRecording({ meetingId: meetingID }, {
+            metadata: metadata,
+        });
+
+        return [response.urls, null];
+    } catch (error: any) {
+        return [null, error as RichClientError];
+    }
+}
