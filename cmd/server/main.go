@@ -11,12 +11,14 @@ import (
 	schedule "github.com/OucheneMohamedNourElIslem658/zoom_clone/internal/schedule"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/auth"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/database"
+	filestorage "github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/file_storage"
 	"google.golang.org/grpc"
 )
 
 func init() {
 	database.Init()
 	auth.Init()
+	filestorage.Init()
 }
 
 func main()  {

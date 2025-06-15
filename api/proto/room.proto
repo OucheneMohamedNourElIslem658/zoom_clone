@@ -11,6 +11,7 @@ service RoomService {
     rpc JoinRoom(JoinRoomRequest) returns (JoinRoomResponse);
     rpc RecordRoom(RecordRoomRequest) returns (google.protobuf.Empty);
     rpc StopRecording(RecordRoomRequest) returns (google.protobuf.Empty);
+    rpc GetRecording(GetRecordingRequest) returns (GetRecordingResponse);
     // rpc GetRoom(GetRoomRequest) returns (Room);
 }
 
@@ -28,4 +29,12 @@ message RecordRoomRequest {
 
 message RecordRoomResponse {
     string recording_url = 1;
+}
+
+message GetRecordingRequest {
+    string meeting_id = 1 [(buf.validate.field).required = true];
+}
+
+message GetRecordingResponse {
+    repeated string urls = 1;
 }

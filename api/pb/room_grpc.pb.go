@@ -23,6 +23,7 @@ const (
 	RoomService_JoinRoom_FullMethodName      = "/room.RoomService/JoinRoom"
 	RoomService_RecordRoom_FullMethodName    = "/room.RoomService/RecordRoom"
 	RoomService_StopRecording_FullMethodName = "/room.RoomService/StopRecording"
+	RoomService_GetRecording_FullMethodName  = "/room.RoomService/GetRecording"
 )
 
 // RoomServiceClient is the client API for RoomService service.
@@ -32,6 +33,7 @@ type RoomServiceClient interface {
 	JoinRoom(ctx context.Context, in *JoinRoomRequest, opts ...grpc.CallOption) (*JoinRoomResponse, error)
 	RecordRoom(ctx context.Context, in *RecordRoomRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	StopRecording(ctx context.Context, in *RecordRoomRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetRecording(ctx context.Context, in *GetRecordingRequest, opts ...grpc.CallOption) (*GetRecordingResponse, error)
 }
 
 type roomServiceClient struct {
@@ -72,6 +74,16 @@ func (c *roomServiceClient) StopRecording(ctx context.Context, in *RecordRoomReq
 	return out, nil
 }
 
+func (c *roomServiceClient) GetRecording(ctx context.Context, in *GetRecordingRequest, opts ...grpc.CallOption) (*GetRecordingResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetRecordingResponse)
+	err := c.cc.Invoke(ctx, RoomService_GetRecording_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RoomServiceServer is the server API for RoomService service.
 // All implementations must embed UnimplementedRoomServiceServer
 // for forward compatibility.
@@ -79,6 +91,7 @@ type RoomServiceServer interface {
 	JoinRoom(context.Context, *JoinRoomRequest) (*JoinRoomResponse, error)
 	RecordRoom(context.Context, *RecordRoomRequest) (*emptypb.Empty, error)
 	StopRecording(context.Context, *RecordRoomRequest) (*emptypb.Empty, error)
+	GetRecording(context.Context, *GetRecordingRequest) (*GetRecordingResponse, error)
 	mustEmbedUnimplementedRoomServiceServer()
 }
 
@@ -97,6 +110,9 @@ func (UnimplementedRoomServiceServer) RecordRoom(context.Context, *RecordRoomReq
 }
 func (UnimplementedRoomServiceServer) StopRecording(context.Context, *RecordRoomRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StopRecording not implemented")
+}
+func (UnimplementedRoomServiceServer) GetRecording(context.Context, *GetRecordingRequest) (*GetRecordingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRecording not implemented")
 }
 func (UnimplementedRoomServiceServer) mustEmbedUnimplementedRoomServiceServer() {}
 func (UnimplementedRoomServiceServer) testEmbeddedByValue()                     {}
@@ -173,6 +189,24 @@ func _RoomService_StopRecording_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RoomService_GetRecording_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRecordingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoomServiceServer).GetRecording(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoomService_GetRecording_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoomServiceServer).GetRecording(ctx, req.(*GetRecordingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RoomService_ServiceDesc is the grpc.ServiceDesc for RoomService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -191,6 +225,10 @@ var RoomService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "StopRecording",
 			Handler:    _RoomService_StopRecording_Handler,
+		},
+		{
+			MethodName: "GetRecording",
+			Handler:    _RoomService_GetRecording_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

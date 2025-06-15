@@ -11,6 +11,7 @@ import (
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/config"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/models"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/database"
+	filestorage "github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/file_storage"
 	"github.com/livekit/protocol/auth"
 	"github.com/livekit/protocol/livekit"
 	lksdk "github.com/livekit/server-sdk-go/v2"
@@ -259,4 +260,32 @@ func (r *RoomRepository) StopRecording(userID string, meetingID string) (error) 
 	}
 
 	return nil
+}
+
+func (r *RoomRepository) GetRoomRecordings(userID string, meetingID string) ([]string, error) {
+	var roomExists bool
+	err := r.database.Model(&models.MeetParticipant{}).
+		Where("meeting_id = ? AND user_id = ?", meetingID, userID).
+		Select("count(*) > 0").
+		Find(&roomExists).
+		Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, status.Error(codes.NotFound, "user is not a participant of this meeting")
+		}
+
+		return nil, status.Error(codes.Internal, "failed to check user participation: "+err.Error())
+	}
+
+	urls, err := filestorage.GetRoomRecordings(meetingID, userID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to get room recordings: "+err.Error())
+	}
+
+	if len(urls) == 0 {
+		return nil, status.Error(codes.NotFound, "no recordings found for this room, or the recordings are still being processed")
+	}
+
+	return urls, nil
 }

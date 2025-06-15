@@ -62,3 +62,19 @@ func (s *RoomHandler) StopRecording(ctx context.Context, req *pb.RecordRoomReque
 
 	return &emptypb.Empty{}, nil
 }
+
+func (s *RoomHandler) GetRecording(ctx context.Context, req *pb.GetRecordingRequest) (*pb.GetRecordingResponse, error) {
+	userID, ok := ctx.Value("user_id").(string)
+	if !ok || userID == "" {
+		return nil, status.Error(codes.Unauthenticated, "requester is not authenticated")
+	}
+
+	urls, err := s.roomRepo.GetRoomRecordings(userID, req.MeetingId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to get room recordings: "+err.Error())
+	}
+
+	return &pb.GetRecordingResponse{
+		Urls: urls,
+	}, nil
+}

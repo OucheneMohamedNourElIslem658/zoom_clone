@@ -199,6 +199,94 @@ func (x *RecordRoomResponse) GetRecordingUrl() string {
 	return ""
 }
 
+type GetRecordingRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MeetingId     string                 `protobuf:"bytes,1,opt,name=meeting_id,json=meetingId,proto3" json:"meeting_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetRecordingRequest) Reset() {
+	*x = GetRecordingRequest{}
+	mi := &file_room_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRecordingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRecordingRequest) ProtoMessage() {}
+
+func (x *GetRecordingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_room_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRecordingRequest.ProtoReflect.Descriptor instead.
+func (*GetRecordingRequest) Descriptor() ([]byte, []int) {
+	return file_room_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetRecordingRequest) GetMeetingId() string {
+	if x != nil {
+		return x.MeetingId
+	}
+	return ""
+}
+
+type GetRecordingResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Urls          []string               `protobuf:"bytes,1,rep,name=urls,proto3" json:"urls,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetRecordingResponse) Reset() {
+	*x = GetRecordingResponse{}
+	mi := &file_room_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRecordingResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRecordingResponse) ProtoMessage() {}
+
+func (x *GetRecordingResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_room_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRecordingResponse.ProtoReflect.Descriptor instead.
+func (*GetRecordingResponse) Descriptor() ([]byte, []int) {
+	return file_room_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetRecordingResponse) GetUrls() []string {
+	if x != nil {
+		return x.Urls
+	}
+	return nil
+}
+
 var File_room_proto protoreflect.FileDescriptor
 
 const file_room_proto_rawDesc = "" +
@@ -214,12 +302,18 @@ const file_room_proto_rawDesc = "" +
 	"\n" +
 	"meeting_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tmeetingId\"9\n" +
 	"\x12RecordRoomResponse\x12#\n" +
-	"\rrecording_url\x18\x01 \x01(\tR\frecordingUrl2\xc9\x01\n" +
+	"\rrecording_url\x18\x01 \x01(\tR\frecordingUrl\"<\n" +
+	"\x13GetRecordingRequest\x12%\n" +
+	"\n" +
+	"meeting_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tmeetingId\"*\n" +
+	"\x14GetRecordingResponse\x12\x12\n" +
+	"\x04urls\x18\x01 \x03(\tR\x04urls2\x90\x02\n" +
 	"\vRoomService\x129\n" +
 	"\bJoinRoom\x12\x15.room.JoinRoomRequest\x1a\x16.room.JoinRoomResponse\x12=\n" +
 	"\n" +
 	"RecordRoom\x12\x17.room.RecordRoomRequest\x1a\x16.google.protobuf.Empty\x12@\n" +
-	"\rStopRecording\x12\x17.room.RecordRoomRequest\x1a\x16.google.protobuf.EmptyB\x03Z\x01.b\x06proto3"
+	"\rStopRecording\x12\x17.room.RecordRoomRequest\x1a\x16.google.protobuf.Empty\x12E\n" +
+	"\fGetRecording\x12\x19.room.GetRecordingRequest\x1a\x1a.room.GetRecordingResponseB\x03Z\x01.b\x06proto3"
 
 var (
 	file_room_proto_rawDescOnce sync.Once
@@ -233,23 +327,27 @@ func file_room_proto_rawDescGZIP() []byte {
 	return file_room_proto_rawDescData
 }
 
-var file_room_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_room_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_room_proto_goTypes = []any{
-	(*JoinRoomRequest)(nil),    // 0: room.JoinRoomRequest
-	(*JoinRoomResponse)(nil),   // 1: room.JoinRoomResponse
-	(*RecordRoomRequest)(nil),  // 2: room.RecordRoomRequest
-	(*RecordRoomResponse)(nil), // 3: room.RecordRoomResponse
-	(*emptypb.Empty)(nil),      // 4: google.protobuf.Empty
+	(*JoinRoomRequest)(nil),      // 0: room.JoinRoomRequest
+	(*JoinRoomResponse)(nil),     // 1: room.JoinRoomResponse
+	(*RecordRoomRequest)(nil),    // 2: room.RecordRoomRequest
+	(*RecordRoomResponse)(nil),   // 3: room.RecordRoomResponse
+	(*GetRecordingRequest)(nil),  // 4: room.GetRecordingRequest
+	(*GetRecordingResponse)(nil), // 5: room.GetRecordingResponse
+	(*emptypb.Empty)(nil),        // 6: google.protobuf.Empty
 }
 var file_room_proto_depIdxs = []int32{
 	0, // 0: room.RoomService.JoinRoom:input_type -> room.JoinRoomRequest
 	2, // 1: room.RoomService.RecordRoom:input_type -> room.RecordRoomRequest
 	2, // 2: room.RoomService.StopRecording:input_type -> room.RecordRoomRequest
-	1, // 3: room.RoomService.JoinRoom:output_type -> room.JoinRoomResponse
-	4, // 4: room.RoomService.RecordRoom:output_type -> google.protobuf.Empty
-	4, // 5: room.RoomService.StopRecording:output_type -> google.protobuf.Empty
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	4, // 3: room.RoomService.GetRecording:input_type -> room.GetRecordingRequest
+	1, // 4: room.RoomService.JoinRoom:output_type -> room.JoinRoomResponse
+	6, // 5: room.RoomService.RecordRoom:output_type -> google.protobuf.Empty
+	6, // 6: room.RoomService.StopRecording:output_type -> google.protobuf.Empty
+	5, // 7: room.RoomService.GetRecording:output_type -> room.GetRecordingResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -266,7 +364,7 @@ func file_room_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_room_proto_rawDesc), len(file_room_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
