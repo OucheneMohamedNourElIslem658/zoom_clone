@@ -5,6 +5,8 @@ import { CustomTrackToggle } from "./track_toogle";
 import { Button } from "../ui/button";
 import { mergeProps } from "./merge_props";
 import { PhoneOff } from "lucide-react";
+import { RecordingSwitcher } from "./recording_switcher";
+import { recordRoom, stopRecordingRoom } from "@/services/room";
 
 /** @public */
 export interface CustomControlBarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -35,6 +37,8 @@ export function CustomControlBar({
     screenShare: true,
     leave: true,
   }
+
+  const meetingID = useRoomContext().name;
 
   const [_, setIsChatOpen] = useState(false);
   const layoutContext = useMaybeLayoutContext();
@@ -103,6 +107,16 @@ export function CustomControlBar({
     [saveVideoInputEnabled],
   );
 
+  // handle the onToggle(isRecording: boolean) function for the RecordingSwitcher
+  const handleRecordingToggle = useCallback(async (isRecording: boolean) => {
+    if (isRecording) {
+      await recordRoom(meetingID)
+    } else {
+      await stopRecordingRoom(meetingID)
+    }
+  }, []);
+
+
   return (
     <div className="flex gap-2 justify-center lk-control-bar fixed bottom-0 left-0 right-0 bg-card h-[100px]">
       {visibleControls.microphone && (
@@ -160,6 +174,7 @@ export function CustomControlBar({
           {showText && (isScreenShareEnabled ? 'Stop screen share' : 'Share screen')}
         </CustomTrackToggle>
       )}
+      <RecordingSwitcher onToggle={handleRecordingToggle}/>
       {visibleControls.chat && (
         <ChatToggle className="h-full">
           {showIcon && <ChatIcon />}

@@ -11,9 +11,6 @@ import { Track } from "livekit-client"
 const ParticipantsList = () => {
     const tracks = useTracks([Track.Source.Camera])
 
-    console.log(tracks);
-    
-
     return (
         <div className="grid grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-4">
             <TrackLoop tracks={tracks}>
@@ -36,10 +33,6 @@ const ParticipantCard = ({ trackRef } : { trackRef : TrackReference}) => {
     const imageURL = metadata.avatar as string; 
     const imageFallback = name ? name.charAt(0).toUpperCase() : "U";
     const isAdmin = metadata.isAdmin || false;
-
-    console.log("ParticipantCard", { trackRef, participant, metadata, name, imageURL, imageFallback, isAdmin });
-    
-
 
     return (
         <Card>

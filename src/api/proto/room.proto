@@ -2,19 +2,26 @@ syntax = "proto3";
 
 package room;
 
-option go_package = ".";
-
-import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
 
 service RoomService {
     rpc JoinRoom(JoinRoomRequest) returns (JoinRoomResponse);
-    // rpc GetRoom(GetRoomRequest) returns (Room);
+    rpc RecordRoom(RecordRoomRequest) returns (google.protobuf.Empty);
+    rpc StopRecording(RecordRoomRequest) returns (google.protobuf.Empty);
 }
 
 message JoinRoomRequest {
-    uint32 meeting_id = 1 [(buf.validate.field).required = true];
+    string meeting_id = 1;
 }
 
 message JoinRoomResponse {
     string token = 1;
+}
+
+message RecordRoomRequest {
+    string meeting_id = 1;
+}
+
+message RecordRoomResponse {
+    string recording_url = 1;
 }

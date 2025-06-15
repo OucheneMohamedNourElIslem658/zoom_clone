@@ -7,25 +7,34 @@
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import type { CallContext, CallOptions } from "nice-grpc-common";
+import { Empty } from "./google/protobuf/empty";
 
 export const protobufPackage = "room";
 
 export interface JoinRoomRequest {
-  meetingId: number;
+  meetingId: string;
 }
 
 export interface JoinRoomResponse {
   token: string;
 }
 
+export interface RecordRoomRequest {
+  meetingId: string;
+}
+
+export interface RecordRoomResponse {
+  recordingUrl: string;
+}
+
 function createBaseJoinRoomRequest(): JoinRoomRequest {
-  return { meetingId: 0 };
+  return { meetingId: "" };
 }
 
 export const JoinRoomRequest: MessageFns<JoinRoomRequest> = {
   encode(message: JoinRoomRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.meetingId !== 0) {
-      writer.uint32(8).uint32(message.meetingId);
+    if (message.meetingId !== "") {
+      writer.uint32(10).string(message.meetingId);
     }
     return writer;
   },
@@ -38,11 +47,11 @@ export const JoinRoomRequest: MessageFns<JoinRoomRequest> = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          if (tag !== 8) {
+          if (tag !== 10) {
             break;
           }
 
-          message.meetingId = reader.uint32();
+          message.meetingId = reader.string();
           continue;
         }
       }
@@ -55,13 +64,13 @@ export const JoinRoomRequest: MessageFns<JoinRoomRequest> = {
   },
 
   fromJSON(object: any): JoinRoomRequest {
-    return { meetingId: isSet(object.meetingId) ? globalThis.Number(object.meetingId) : 0 };
+    return { meetingId: isSet(object.meetingId) ? globalThis.String(object.meetingId) : "" };
   },
 
   toJSON(message: JoinRoomRequest): unknown {
     const obj: any = {};
-    if (message.meetingId !== 0) {
-      obj.meetingId = Math.round(message.meetingId);
+    if (message.meetingId !== "") {
+      obj.meetingId = message.meetingId;
     }
     return obj;
   },
@@ -71,7 +80,7 @@ export const JoinRoomRequest: MessageFns<JoinRoomRequest> = {
   },
   fromPartial(object: DeepPartial<JoinRoomRequest>): JoinRoomRequest {
     const message = createBaseJoinRoomRequest();
-    message.meetingId = object.meetingId ?? 0;
+    message.meetingId = object.meetingId ?? "";
     return message;
   },
 };
@@ -134,12 +143,127 @@ export const JoinRoomResponse: MessageFns<JoinRoomResponse> = {
   },
 };
 
+function createBaseRecordRoomRequest(): RecordRoomRequest {
+  return { meetingId: "" };
+}
+
+export const RecordRoomRequest: MessageFns<RecordRoomRequest> = {
+  encode(message: RecordRoomRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.meetingId !== "") {
+      writer.uint32(10).string(message.meetingId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RecordRoomRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRecordRoomRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.meetingId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RecordRoomRequest {
+    return { meetingId: isSet(object.meetingId) ? globalThis.String(object.meetingId) : "" };
+  },
+
+  toJSON(message: RecordRoomRequest): unknown {
+    const obj: any = {};
+    if (message.meetingId !== "") {
+      obj.meetingId = message.meetingId;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<RecordRoomRequest>): RecordRoomRequest {
+    return RecordRoomRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<RecordRoomRequest>): RecordRoomRequest {
+    const message = createBaseRecordRoomRequest();
+    message.meetingId = object.meetingId ?? "";
+    return message;
+  },
+};
+
+function createBaseRecordRoomResponse(): RecordRoomResponse {
+  return { recordingUrl: "" };
+}
+
+export const RecordRoomResponse: MessageFns<RecordRoomResponse> = {
+  encode(message: RecordRoomResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.recordingUrl !== "") {
+      writer.uint32(10).string(message.recordingUrl);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RecordRoomResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRecordRoomResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.recordingUrl = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RecordRoomResponse {
+    return { recordingUrl: isSet(object.recordingUrl) ? globalThis.String(object.recordingUrl) : "" };
+  },
+
+  toJSON(message: RecordRoomResponse): unknown {
+    const obj: any = {};
+    if (message.recordingUrl !== "") {
+      obj.recordingUrl = message.recordingUrl;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<RecordRoomResponse>): RecordRoomResponse {
+    return RecordRoomResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<RecordRoomResponse>): RecordRoomResponse {
+    const message = createBaseRecordRoomResponse();
+    message.recordingUrl = object.recordingUrl ?? "";
+    return message;
+  },
+};
+
 export type RoomServiceDefinition = typeof RoomServiceDefinition;
 export const RoomServiceDefinition = {
   name: "RoomService",
   fullName: "room.RoomService",
   methods: {
-    /** rpc GetRoom(GetRoomRequest) returns (Room); */
     joinRoom: {
       name: "JoinRoom",
       requestType: JoinRoomRequest,
@@ -148,17 +272,35 @@ export const RoomServiceDefinition = {
       responseStream: false,
       options: {},
     },
+    recordRoom: {
+      name: "RecordRoom",
+      requestType: RecordRoomRequest,
+      requestStream: false,
+      responseType: Empty,
+      responseStream: false,
+      options: {},
+    },
+    stopRecording: {
+      name: "StopRecording",
+      requestType: RecordRoomRequest,
+      requestStream: false,
+      responseType: Empty,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
 export interface RoomServiceImplementation<CallContextExt = {}> {
-  /** rpc GetRoom(GetRoomRequest) returns (Room); */
   joinRoom(request: JoinRoomRequest, context: CallContext & CallContextExt): Promise<DeepPartial<JoinRoomResponse>>;
+  recordRoom(request: RecordRoomRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Empty>>;
+  stopRecording(request: RecordRoomRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Empty>>;
 }
 
 export interface RoomServiceClient<CallOptionsExt = {}> {
-  /** rpc GetRoom(GetRoomRequest) returns (Room); */
   joinRoom(request: DeepPartial<JoinRoomRequest>, options?: CallOptions & CallOptionsExt): Promise<JoinRoomResponse>;
+  recordRoom(request: DeepPartial<RecordRoomRequest>, options?: CallOptions & CallOptionsExt): Promise<Empty>;
+  stopRecording(request: DeepPartial<RecordRoomRequest>, options?: CallOptions & CallOptionsExt): Promise<Empty>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

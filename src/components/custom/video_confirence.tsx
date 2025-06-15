@@ -64,7 +64,6 @@ export function CustomVideoConference({
   );
 
   const widgetUpdate = (state: WidgetState) => {
-    console.log('updating widget state', state);
     setWidgetState(state);
   };
 
@@ -82,7 +81,6 @@ export function CustomVideoConference({
       screenShareTracks.some((track) => track.publication.isSubscribed) &&
       lastAutoFocusedScreenShareTrack.current === null
     ) {
-      console.log('Auto set screen share focus:', { newScreenShareTrack: screenShareTracks[0] });
       layoutContext.pin.dispatch?.({ msg: 'set_pin', trackReference: screenShareTracks[0] });
       lastAutoFocusedScreenShareTrack.current = screenShareTracks[0];
     } else if (
@@ -93,7 +91,6 @@ export function CustomVideoConference({
           lastAutoFocusedScreenShareTrack.current?.publication?.trackSid,
       )
     ) {
-      console.log('Auto clearing screen share focus.');
       layoutContext.pin.dispatch?.({ msg: 'clear_pin' });
       lastAutoFocusedScreenShareTrack.current = null;
     }
