@@ -1,4 +1,4 @@
-import { JoinRoomRequest } from "@/api/pb/room"
+import { GetRecordingResponse, JoinRoomRequest } from "@/api/pb/room"
 import { getAccessToken } from "./auth"
 import client from "@/commun/rooms"
 import { Metadata } from "nice-grpc-web"
@@ -82,7 +82,7 @@ export const stopRecordingRoom = async (meetingID: string): Promise<RichClientEr
     }
 };
 
-export const getRecodrings = async (meetingID: string): Promise<[string[] | null, RichClientError | Error | null]> => {
+export const getRecodrings = async (meetingID: string): Promise<[GetRecordingResponse | null, RichClientError | Error | null]> => {
     const accessToken = await getAccessToken();
     if (!accessToken) {
         return [null, new Error("Access token is not available. Please log in.")];
@@ -99,7 +99,7 @@ export const getRecodrings = async (meetingID: string): Promise<[string[] | null
             metadata: metadata,
         });
 
-        return [response.urls, null];
+        return [response, null];
     } catch (error: any) {
         return [null, error as RichClientError];
     }

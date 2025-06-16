@@ -33,5 +33,7 @@ message GetRecordingRequest {
 }
 
 message GetRecordingResponse {
-    repeated string urls = 1;
+    string meetingName = 1;
+    string meetingDescription = 2;
+    repeated string urls = 3;
 }

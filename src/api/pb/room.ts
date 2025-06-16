@@ -32,6 +32,8 @@ export interface GetRecordingRequest {
 }
 
 export interface GetRecordingResponse {
+  meetingName: string;
+  meetingDescription: string;
   urls: string[];
 }
 
@@ -326,13 +328,19 @@ export const GetRecordingRequest: MessageFns<GetRecordingRequest> = {
 };
 
 function createBaseGetRecordingResponse(): GetRecordingResponse {
-  return { urls: [] };
+  return { meetingName: "", meetingDescription: "", urls: [] };
 }
 
 export const GetRecordingResponse: MessageFns<GetRecordingResponse> = {
   encode(message: GetRecordingResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.meetingName !== "") {
+      writer.uint32(10).string(message.meetingName);
+    }
+    if (message.meetingDescription !== "") {
+      writer.uint32(18).string(message.meetingDescription);
+    }
     for (const v of message.urls) {
-      writer.uint32(10).string(v!);
+      writer.uint32(26).string(v!);
     }
     return writer;
   },
@@ -349,6 +357,22 @@ export const GetRecordingResponse: MessageFns<GetRecordingResponse> = {
             break;
           }
 
+          message.meetingName = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.meetingDescription = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
           message.urls.push(reader.string());
           continue;
         }
@@ -362,11 +386,21 @@ export const GetRecordingResponse: MessageFns<GetRecordingResponse> = {
   },
 
   fromJSON(object: any): GetRecordingResponse {
-    return { urls: globalThis.Array.isArray(object?.urls) ? object.urls.map((e: any) => globalThis.String(e)) : [] };
+    return {
+      meetingName: isSet(object.meetingName) ? globalThis.String(object.meetingName) : "",
+      meetingDescription: isSet(object.meetingDescription) ? globalThis.String(object.meetingDescription) : "",
+      urls: globalThis.Array.isArray(object?.urls) ? object.urls.map((e: any) => globalThis.String(e)) : [],
+    };
   },
 
   toJSON(message: GetRecordingResponse): unknown {
     const obj: any = {};
+    if (message.meetingName !== "") {
+      obj.meetingName = message.meetingName;
+    }
+    if (message.meetingDescription !== "") {
+      obj.meetingDescription = message.meetingDescription;
+    }
     if (message.urls?.length) {
       obj.urls = message.urls;
     }
@@ -378,6 +412,8 @@ export const GetRecordingResponse: MessageFns<GetRecordingResponse> = {
   },
   fromPartial(object: DeepPartial<GetRecordingResponse>): GetRecordingResponse {
     const message = createBaseGetRecordingResponse();
+    message.meetingName = object.meetingName ?? "";
+    message.meetingDescription = object.meetingDescription ?? "";
     message.urls = object.urls?.map((e) => e) || [];
     return message;
   },

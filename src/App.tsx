@@ -6,6 +6,7 @@ import RoomPreparationPage from "./pages/preparation";
 import MeetPage from "./pages/meet";
 import { AppBar } from "./components/custom/app_bar";
 import { useEffect } from "react";
+import RecordingsPage from "./pages/recordings";
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/meetings/:id/preparation" element={<RoomPreparationPage />} />
           <Route path="/meetings/:id/meet" element={<MeetPage />} />
+          <Route path="/meetings/:id/recordings" element={<RecordingsPage />} />
         </Routes>
       </div>
     </Router>
