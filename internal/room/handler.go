@@ -46,7 +46,8 @@ func (s *RoomHandler) RecordRoom(ctx context.Context, req *pb.RecordRoomRequest)
 	if err != nil {
 		return nil, err
 	}
-	return nil, status.Errorf(codes.Unimplemented, "method RecordRoom not implemented")
+
+	return &emptypb.Empty{}, nil
 }
 
 func (s *RoomHandler) StopRecording(ctx context.Context, req *pb.RecordRoomRequest) (*emptypb.Empty, error) {
@@ -69,12 +70,10 @@ func (s *RoomHandler) GetRecording(ctx context.Context, req *pb.GetRecordingRequ
 		return nil, status.Error(codes.Unauthenticated, "requester is not authenticated")
 	}
 
-	urls, err := s.roomRepo.GetRoomRecordings(userID, req.MeetingId)
+	response, err := s.roomRepo.GetRoomRecordings(userID, req.MeetingId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to get room recordings: "+err.Error())
 	}
 
-	return &pb.GetRecordingResponse{
-		Urls: urls,
-	}, nil
+	return response, nil
 }

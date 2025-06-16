@@ -244,10 +244,12 @@ func (x *GetRecordingRequest) GetMeetingId() string {
 }
 
 type GetRecordingResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Urls          []string               `protobuf:"bytes,1,rep,name=urls,proto3" json:"urls,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	MeetingName        string                 `protobuf:"bytes,1,opt,name=meetingName,proto3" json:"meetingName,omitempty"`
+	MeetingDescription string                 `protobuf:"bytes,2,opt,name=meetingDescription,proto3" json:"meetingDescription,omitempty"`
+	Urls               []string               `protobuf:"bytes,3,rep,name=urls,proto3" json:"urls,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *GetRecordingResponse) Reset() {
@@ -280,6 +282,20 @@ func (*GetRecordingResponse) Descriptor() ([]byte, []int) {
 	return file_room_proto_rawDescGZIP(), []int{5}
 }
 
+func (x *GetRecordingResponse) GetMeetingName() string {
+	if x != nil {
+		return x.MeetingName
+	}
+	return ""
+}
+
+func (x *GetRecordingResponse) GetMeetingDescription() string {
+	if x != nil {
+		return x.MeetingDescription
+	}
+	return ""
+}
+
 func (x *GetRecordingResponse) GetUrls() []string {
 	if x != nil {
 		return x.Urls
@@ -305,9 +321,11 @@ const file_room_proto_rawDesc = "" +
 	"\rrecording_url\x18\x01 \x01(\tR\frecordingUrl\"<\n" +
 	"\x13GetRecordingRequest\x12%\n" +
 	"\n" +
-	"meeting_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tmeetingId\"*\n" +
-	"\x14GetRecordingResponse\x12\x12\n" +
-	"\x04urls\x18\x01 \x03(\tR\x04urls2\x90\x02\n" +
+	"meeting_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tmeetingId\"|\n" +
+	"\x14GetRecordingResponse\x12 \n" +
+	"\vmeetingName\x18\x01 \x01(\tR\vmeetingName\x12.\n" +
+	"\x12meetingDescription\x18\x02 \x01(\tR\x12meetingDescription\x12\x12\n" +
+	"\x04urls\x18\x03 \x03(\tR\x04urls2\x90\x02\n" +
 	"\vRoomService\x129\n" +
 	"\bJoinRoom\x12\x15.room.JoinRoomRequest\x1a\x16.room.JoinRoomResponse\x12=\n" +
 	"\n" +
