@@ -77,3 +77,19 @@ func (s *RoomHandler) GetRecording(ctx context.Context, req *pb.GetRecordingRequ
 
 	return response, nil
 }
+
+func (s *RoomHandler) GenerateGuestJoinRoomToken(ctx context.Context, req *pb.GenerateJoinLinkRequest) (*pb.GenerateJoinLinkResponse, error) {
+	userID, ok := ctx.Value("user_id").(string)
+	if !ok || userID == "" {
+		return nil, status.Error(codes.Unauthenticated, "requester is not authenticated")
+	}
+
+	token, err := s.roomRepo.GenerateGuestJoinRoomToken(userID, req.MeetingId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GenerateJoinLinkResponse{
+		Token: *token,
+	}, nil
+}

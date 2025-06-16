@@ -7,11 +7,12 @@ import (
 	"net/http"
 	"time"
 
+	pb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/config"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/models"
 	"github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/database"
 	filestorage "github.com/OucheneMohamedNourElIslem658/zoom_clone/pkg/file_storage"
-	pb "github.com/OucheneMohamedNourElIslem658/zoom_clone/api/pb"
+	"github.com/google/uuid"
 	"github.com/livekit/protocol/auth"
 	"github.com/livekit/protocol/livekit"
 	lksdk "github.com/livekit/server-sdk-go/v2"
@@ -291,4 +292,55 @@ func (r *RoomRepository) GetRoomRecordings(userID string, meetingID string) (*pb
 		MeetingDescription: participant.Meeting.Description,
 		Urls: urls,
 	}, nil
+}
+
+func (r *RoomRepository) GenerateGuestJoinRoomToken(hostID string, meetingID string) (token *string, apiErr error) {
+	var isHost bool
+	err := r.database.Model(&models.MeetParticipant{}).
+		Where("user_id = ? AND meeting_id = ?", hostID, meetingID).
+		Select("is_host").
+		First(&isHost).
+		Error
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to check user participation: "+err.Error())
+	}
+
+	if !isHost {
+		return nil, status.Error(codes.PermissionDenied, "user is not a host of this meeting")
+	}
+
+	config := config.Load()
+	if config == nil {
+		return nil, status.Error(codes.Internal, "live configuration is not set")
+	}
+
+	at := auth.NewAccessToken(
+		config.LiveKitAPIKey,
+		config.LiveKitAPISecret,
+	)
+
+	grant := &auth.VideoGrant{
+		Room:       meetingID,
+		RoomJoin:   true,
+		RoomRecord: false,
+	}
+
+	id := uuid.New().String()
+
+	roomToken := at.
+		SetIdentity(id).
+		SetVideoGrant(grant).
+		SetName("Guest")
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to create room token: "+err.Error())
+	}
+
+	tokenString, err := roomToken.ToJWT()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to generate JWT token: "+err.Error())
+	}
+
+	return &tokenString, nil
 }

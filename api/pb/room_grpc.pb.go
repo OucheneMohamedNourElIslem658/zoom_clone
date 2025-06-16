@@ -20,10 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RoomService_JoinRoom_FullMethodName      = "/room.RoomService/JoinRoom"
-	RoomService_RecordRoom_FullMethodName    = "/room.RoomService/RecordRoom"
-	RoomService_StopRecording_FullMethodName = "/room.RoomService/StopRecording"
-	RoomService_GetRecording_FullMethodName  = "/room.RoomService/GetRecording"
+	RoomService_JoinRoom_FullMethodName                   = "/room.RoomService/JoinRoom"
+	RoomService_RecordRoom_FullMethodName                 = "/room.RoomService/RecordRoom"
+	RoomService_StopRecording_FullMethodName              = "/room.RoomService/StopRecording"
+	RoomService_GetRecording_FullMethodName               = "/room.RoomService/GetRecording"
+	RoomService_GenerateGuestJoinRoomToken_FullMethodName = "/room.RoomService/GenerateGuestJoinRoomToken"
 )
 
 // RoomServiceClient is the client API for RoomService service.
@@ -34,6 +35,7 @@ type RoomServiceClient interface {
 	RecordRoom(ctx context.Context, in *RecordRoomRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	StopRecording(ctx context.Context, in *RecordRoomRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetRecording(ctx context.Context, in *GetRecordingRequest, opts ...grpc.CallOption) (*GetRecordingResponse, error)
+	GenerateGuestJoinRoomToken(ctx context.Context, in *GenerateJoinLinkRequest, opts ...grpc.CallOption) (*GenerateJoinLinkResponse, error)
 }
 
 type roomServiceClient struct {
@@ -84,6 +86,16 @@ func (c *roomServiceClient) GetRecording(ctx context.Context, in *GetRecordingRe
 	return out, nil
 }
 
+func (c *roomServiceClient) GenerateGuestJoinRoomToken(ctx context.Context, in *GenerateJoinLinkRequest, opts ...grpc.CallOption) (*GenerateJoinLinkResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GenerateJoinLinkResponse)
+	err := c.cc.Invoke(ctx, RoomService_GenerateGuestJoinRoomToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RoomServiceServer is the server API for RoomService service.
 // All implementations must embed UnimplementedRoomServiceServer
 // for forward compatibility.
@@ -92,6 +104,7 @@ type RoomServiceServer interface {
 	RecordRoom(context.Context, *RecordRoomRequest) (*emptypb.Empty, error)
 	StopRecording(context.Context, *RecordRoomRequest) (*emptypb.Empty, error)
 	GetRecording(context.Context, *GetRecordingRequest) (*GetRecordingResponse, error)
+	GenerateGuestJoinRoomToken(context.Context, *GenerateJoinLinkRequest) (*GenerateJoinLinkResponse, error)
 	mustEmbedUnimplementedRoomServiceServer()
 }
 
@@ -113,6 +126,9 @@ func (UnimplementedRoomServiceServer) StopRecording(context.Context, *RecordRoom
 }
 func (UnimplementedRoomServiceServer) GetRecording(context.Context, *GetRecordingRequest) (*GetRecordingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRecording not implemented")
+}
+func (UnimplementedRoomServiceServer) GenerateGuestJoinRoomToken(context.Context, *GenerateJoinLinkRequest) (*GenerateJoinLinkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateGuestJoinRoomToken not implemented")
 }
 func (UnimplementedRoomServiceServer) mustEmbedUnimplementedRoomServiceServer() {}
 func (UnimplementedRoomServiceServer) testEmbeddedByValue()                     {}
@@ -207,6 +223,24 @@ func _RoomService_GetRecording_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RoomService_GenerateGuestJoinRoomToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateJoinLinkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoomServiceServer).GenerateGuestJoinRoomToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoomService_GenerateGuestJoinRoomToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoomServiceServer).GenerateGuestJoinRoomToken(ctx, req.(*GenerateJoinLinkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RoomService_ServiceDesc is the grpc.ServiceDesc for RoomService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -229,6 +263,10 @@ var RoomService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRecording",
 			Handler:    _RoomService_GetRecording_Handler,
+		},
+		{
+			MethodName: "GenerateGuestJoinRoomToken",
+			Handler:    _RoomService_GenerateGuestJoinRoomToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

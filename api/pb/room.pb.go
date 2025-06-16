@@ -303,6 +303,94 @@ func (x *GetRecordingResponse) GetUrls() []string {
 	return nil
 }
 
+type GenerateJoinLinkRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MeetingId     string                 `protobuf:"bytes,1,opt,name=meeting_id,json=meetingId,proto3" json:"meeting_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateJoinLinkRequest) Reset() {
+	*x = GenerateJoinLinkRequest{}
+	mi := &file_room_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateJoinLinkRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateJoinLinkRequest) ProtoMessage() {}
+
+func (x *GenerateJoinLinkRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_room_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateJoinLinkRequest.ProtoReflect.Descriptor instead.
+func (*GenerateJoinLinkRequest) Descriptor() ([]byte, []int) {
+	return file_room_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GenerateJoinLinkRequest) GetMeetingId() string {
+	if x != nil {
+		return x.MeetingId
+	}
+	return ""
+}
+
+type GenerateJoinLinkResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateJoinLinkResponse) Reset() {
+	*x = GenerateJoinLinkResponse{}
+	mi := &file_room_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateJoinLinkResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateJoinLinkResponse) ProtoMessage() {}
+
+func (x *GenerateJoinLinkResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_room_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateJoinLinkResponse.ProtoReflect.Descriptor instead.
+func (*GenerateJoinLinkResponse) Descriptor() ([]byte, []int) {
+	return file_room_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GenerateJoinLinkResponse) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
 var File_room_proto protoreflect.FileDescriptor
 
 const file_room_proto_rawDesc = "" +
@@ -325,13 +413,19 @@ const file_room_proto_rawDesc = "" +
 	"\x14GetRecordingResponse\x12 \n" +
 	"\vmeetingName\x18\x01 \x01(\tR\vmeetingName\x12.\n" +
 	"\x12meetingDescription\x18\x02 \x01(\tR\x12meetingDescription\x12\x12\n" +
-	"\x04urls\x18\x03 \x03(\tR\x04urls2\x90\x02\n" +
+	"\x04urls\x18\x03 \x03(\tR\x04urls\"@\n" +
+	"\x17GenerateJoinLinkRequest\x12%\n" +
+	"\n" +
+	"meeting_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\tmeetingId\"0\n" +
+	"\x18GenerateJoinLinkResponse\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token2\xed\x02\n" +
 	"\vRoomService\x129\n" +
 	"\bJoinRoom\x12\x15.room.JoinRoomRequest\x1a\x16.room.JoinRoomResponse\x12=\n" +
 	"\n" +
 	"RecordRoom\x12\x17.room.RecordRoomRequest\x1a\x16.google.protobuf.Empty\x12@\n" +
 	"\rStopRecording\x12\x17.room.RecordRoomRequest\x1a\x16.google.protobuf.Empty\x12E\n" +
-	"\fGetRecording\x12\x19.room.GetRecordingRequest\x1a\x1a.room.GetRecordingResponseB\x03Z\x01.b\x06proto3"
+	"\fGetRecording\x12\x19.room.GetRecordingRequest\x1a\x1a.room.GetRecordingResponse\x12[\n" +
+	"\x1aGenerateGuestJoinRoomToken\x12\x1d.room.GenerateJoinLinkRequest\x1a\x1e.room.GenerateJoinLinkResponseB\x03Z\x01.b\x06proto3"
 
 var (
 	file_room_proto_rawDescOnce sync.Once
@@ -345,27 +439,31 @@ func file_room_proto_rawDescGZIP() []byte {
 	return file_room_proto_rawDescData
 }
 
-var file_room_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_room_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_room_proto_goTypes = []any{
-	(*JoinRoomRequest)(nil),      // 0: room.JoinRoomRequest
-	(*JoinRoomResponse)(nil),     // 1: room.JoinRoomResponse
-	(*RecordRoomRequest)(nil),    // 2: room.RecordRoomRequest
-	(*RecordRoomResponse)(nil),   // 3: room.RecordRoomResponse
-	(*GetRecordingRequest)(nil),  // 4: room.GetRecordingRequest
-	(*GetRecordingResponse)(nil), // 5: room.GetRecordingResponse
-	(*emptypb.Empty)(nil),        // 6: google.protobuf.Empty
+	(*JoinRoomRequest)(nil),          // 0: room.JoinRoomRequest
+	(*JoinRoomResponse)(nil),         // 1: room.JoinRoomResponse
+	(*RecordRoomRequest)(nil),        // 2: room.RecordRoomRequest
+	(*RecordRoomResponse)(nil),       // 3: room.RecordRoomResponse
+	(*GetRecordingRequest)(nil),      // 4: room.GetRecordingRequest
+	(*GetRecordingResponse)(nil),     // 5: room.GetRecordingResponse
+	(*GenerateJoinLinkRequest)(nil),  // 6: room.GenerateJoinLinkRequest
+	(*GenerateJoinLinkResponse)(nil), // 7: room.GenerateJoinLinkResponse
+	(*emptypb.Empty)(nil),            // 8: google.protobuf.Empty
 }
 var file_room_proto_depIdxs = []int32{
 	0, // 0: room.RoomService.JoinRoom:input_type -> room.JoinRoomRequest
 	2, // 1: room.RoomService.RecordRoom:input_type -> room.RecordRoomRequest
 	2, // 2: room.RoomService.StopRecording:input_type -> room.RecordRoomRequest
 	4, // 3: room.RoomService.GetRecording:input_type -> room.GetRecordingRequest
-	1, // 4: room.RoomService.JoinRoom:output_type -> room.JoinRoomResponse
-	6, // 5: room.RoomService.RecordRoom:output_type -> google.protobuf.Empty
-	6, // 6: room.RoomService.StopRecording:output_type -> google.protobuf.Empty
-	5, // 7: room.RoomService.GetRecording:output_type -> room.GetRecordingResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	6, // 4: room.RoomService.GenerateGuestJoinRoomToken:input_type -> room.GenerateJoinLinkRequest
+	1, // 5: room.RoomService.JoinRoom:output_type -> room.JoinRoomResponse
+	8, // 6: room.RoomService.RecordRoom:output_type -> google.protobuf.Empty
+	8, // 7: room.RoomService.StopRecording:output_type -> google.protobuf.Empty
+	5, // 8: room.RoomService.GetRecording:output_type -> room.GetRecordingResponse
+	7, // 9: room.RoomService.GenerateGuestJoinRoomToken:output_type -> room.GenerateJoinLinkResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -382,7 +480,7 @@ func file_room_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_room_proto_rawDesc), len(file_room_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
