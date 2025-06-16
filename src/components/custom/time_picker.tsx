@@ -13,13 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-const futureTime = (() => {
-  const now = new Date();
-  now.setMinutes(now.getMinutes() + 1);
-  return now.toTimeString().slice(0, 8);
-})()
-
-export function TimePicker({dateName, timeName, dateRequired, timeRequired}: {dateName?: string; timeName?: string, dateRequired?: boolean; timeRequired?: boolean}) {
+export function TimePicker({dateName, timeName, dateRequired, timeRequired, disabled}: {dateName?: string; timeName?: string, dateRequired?: boolean; timeRequired?: boolean, disabled?: boolean}) {
   const [open, setOpen] = React.useState(false)
   const [date, setDate] = React.useState<Date | undefined>(undefined)
 
@@ -36,6 +30,7 @@ export function TimePicker({dateName, timeName, dateRequired, timeRequired}: {da
               type="date"
               name={dateName}
               required={dateRequired}
+              disabled={disabled}
               value={date ? date.toISOString().slice(0, 10) : ""}
               className="bg-background pr-10"
               onChange={() => {}}
@@ -54,6 +49,7 @@ export function TimePicker({dateName, timeName, dateRequired, timeRequired}: {da
             className="bg-background pr-10"
             placeholder="Select date"
             onClick={() => setOpen(true)}
+            disabled={disabled}
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") {
                 e.preventDefault()
@@ -68,6 +64,7 @@ export function TimePicker({dateName, timeName, dateRequired, timeRequired}: {da
                 id="date-picker"
                 variant="ghost"
                 className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
+                disabled={disabled}
               >
                 <CalendarIcon className="size-3.5" />
                 <span className="sr-only">Select date</span>
@@ -106,7 +103,7 @@ export function TimePicker({dateName, timeName, dateRequired, timeRequired}: {da
           required={timeRequired}
           step="1"
           className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-          min={futureTime}
+          disabled={disabled}
         />
       </div>
     </div>

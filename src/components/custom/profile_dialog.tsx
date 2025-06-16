@@ -1,13 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
-import { Bell, Camera, User } from "lucide-react"
+import { Bell, User } from "lucide-react"
 
 interface ProfileDialogProps {
   user: any
@@ -16,10 +14,31 @@ interface ProfileDialogProps {
 }
 
 export function ProfileDialog({ user, isOpen, onOpenChange }: ProfileDialogProps) {
-  const [notifications, setNotifications] = useState(true)
-  const [emailNotifications, setEmailNotifications] = useState(false)
+  // Get system theme
+  const getSystemTheme = (): "dark" | "light" => {
+    if (typeof window !== "undefined" && window.matchMedia) {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    return "light";
+  };
 
-  const userInfo = user.user_metadata
+  const [theme, setTheme] = useState<"dark" | "light">(getSystemTheme());
+
+  const handleThemeChange = (value: "dark" | "light") => {
+    if (value === "light") {
+      document.documentElement.classList.remove("dark");
+    } else {
+      document.documentElement.classList.add("dark");
+    }
+    setTheme(value);
+  };
+
+  const userInfo = user.user_metadata;
+
+  useEffect(() => {
+    const initialTheme = userInfo.theme || getSystemTheme();
+    handleThemeChange(initialTheme);
+  }, [])
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -49,9 +68,6 @@ export function ProfileDialog({ user, isOpen, onOpenChange }: ProfileDialogProps
                     <AvatarImage src={userInfo.avatar_url || "/placeholder.svg?height=80&width=80"} alt={userInfo.name} />
                     <AvatarFallback className="text-lg">{userInfo.name.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <Button size="sm" variant="outline" className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0">
-                    <Camera className="w-4 h-4" />
-                  </Button>
                 </div>
                 <div className="space-y-1">
                   <h3 className="font-medium">{userInfo.name}</h3>
@@ -68,30 +84,39 @@ export function ProfileDialog({ user, isOpen, onOpenChange }: ProfileDialogProps
             </CardContent>
           </Card>
 
-          {/* Notifications */}
+          {/* Settings */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Bell className="w-4 h-4" />
-                Notifications
+                Theme & Appearance
               </CardTitle>
-              <CardDescription>Configure how you receive notifications.</CardDescription>
+              <CardDescription>
+                Customize your theme and apperance preferences.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Push Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Receive notifications in your browser</p>
+                  <Label>Theme</Label>
+                  <p className="text-sm text-muted-foreground">Choose your preferred theme</p>
                 </div>
-                <Switch checked={notifications} onCheckedChange={setNotifications} />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Receive notifications via email</p>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant={theme === "light" ? "default" : "outline"}
+                    onClick={() => handleThemeChange("light")}
+                  >
+                    Light
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={theme === "dark" ? "default" : "outline"}
+                    onClick={() => handleThemeChange("dark")}
+                  >
+                    Dark
+                  </Button>
                 </div>
-                <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
               </div>
             </CardContent>
           </Card>
@@ -105,5 +130,5 @@ export function ProfileDialog({ user, isOpen, onOpenChange }: ProfileDialogProps
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

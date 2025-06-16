@@ -149,7 +149,7 @@ export default function RoomPreparationPage() {
 
     // Join meeting
     const handleJoinMeeting = async () => {
-        const [token, error] = await joinRoom(Number(meetingId))
+        const [token, error] = await joinRoom(meetingId || "")
         if (error) {
             console.error("Error joining room:", error)
             return

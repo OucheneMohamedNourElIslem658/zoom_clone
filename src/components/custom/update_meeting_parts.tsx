@@ -9,9 +9,11 @@ import { Input } from "../ui/input"
 export const MeetingDetailsSection = ({
     meeting,
     handleInputChange,
+    disabled
 }: {
     meeting: Meeting | null
     handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
+    disabled?: boolean
 }) => (
     <Card>
         <CardContent>
@@ -33,6 +35,7 @@ export const MeetingDetailsSection = ({
                             required
                             value={meeting?.title || ""}
                             onChange={handleInputChange}
+                            disabled={disabled}
                         />
                     </div>
                     <div className="space-y-2">
@@ -46,6 +49,7 @@ export const MeetingDetailsSection = ({
                             name="description"
                             value={meeting?.description || ""}
                             onChange={handleInputChange}
+                            disabled={disabled}
                         />
                     </div>
                 </div>
@@ -57,9 +61,11 @@ export const MeetingDetailsSection = ({
 export const MeetingScheduleSection = ({
     meeting,
     handleTypeChange,
+    disabled
 }: {
     meeting: Meeting | null
     handleTypeChange: (value: string) => void
+    disabled?: boolean
 }) => (
     <Card>
         <CardContent>
@@ -74,7 +80,7 @@ export const MeetingScheduleSection = ({
                             <MapPin className="w-3 h-3" />
                             Meeting Type *
                         </Label>
-                        <Select value={meeting?.type === MeetingType.VIDEO ? "video" : "audio"} onValueChange={handleTypeChange}>
+                        <Select value={meeting?.type === MeetingType.VIDEO ? "video" : "audio"} onValueChange={handleTypeChange}  disabled={disabled}>
                             <SelectTrigger className="h-11">
                                 <SelectValue placeholder="Select meeting type" />
                             </SelectTrigger>

@@ -20,9 +20,11 @@ interface User {
 export default function PaginatedUsersSearchCard({
     onParticipantsChange,
     defaultSelectedUsers = [],
+    disabled
 }: {
     onParticipantsChange?: (participants: User[]) => void
     defaultSelectedUsers?: User[]
+    disabled?: boolean
 }) {
     
     const [participants, setParticipants] = useState<User[]>([])
@@ -76,6 +78,7 @@ export default function PaginatedUsersSearchCard({
                                     variant="outline"
                                     className="w-full justify-start text-left font-normal h-11"
                                     onClick={() => setSearchOpen(true)}
+                                    disabled={disabled}
                                 >
                                     <Search className="w-4 h-4 mr-2 text-muted-foreground" />
                                     {searchValue || "Search and add participants..."}
@@ -88,6 +91,7 @@ export default function PaginatedUsersSearchCard({
                                         value={searchValue}
                                         onValueChange={setSearchValue}
                                         className="border-0 focus:ring-0"
+                                        disabled={disabled}
                                     />
                                     <CommandList className="max-h-64">
                                         <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
@@ -180,6 +184,7 @@ export default function PaginatedUsersSearchCard({
                                                 variant="ghost"
                                                 size="sm"
                                                 className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground rounded-full"
+                                                disabled={disabled}
                                                 onClick={() => removeParticipant(participant.email)}
                                             >
                                                 <X className="w-3 h-3" />

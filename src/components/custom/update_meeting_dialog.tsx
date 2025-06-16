@@ -169,10 +169,15 @@ const UpdateMeetingDialog = ({
                     <Loader />
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <MeetingDetailsSection meeting={meeting} handleInputChange={handleInputChange} />
+                        <MeetingDetailsSection 
+                            meeting={meeting} 
+                            handleInputChange={handleInputChange} 
+                            disabled={isUpdating}
+                        />
                         <MeetingScheduleSection 
                             meeting={meeting} 
                             handleTypeChange={handleTypeChange} 
+                            disabled={isUpdating}
                         />
                         <PaginatedUsersSearchCard
                             defaultSelectedUsers={meeting?.firstThreeParticipants || []}
@@ -180,6 +185,7 @@ const UpdateMeetingDialog = ({
                                 const selectedIDs = users.map((user) => user.id)
                                 setSelectedParticipantsIDs(selectedIDs)
                             }}
+                            disabled={isUpdating}
                         />
                         <ErrorCard err={err} validationViolations={validationViolations} setError={setError} />
                         <Separator />

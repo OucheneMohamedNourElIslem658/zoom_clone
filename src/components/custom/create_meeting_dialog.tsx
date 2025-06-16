@@ -32,6 +32,7 @@ const CreateMeetingDialog = () => {
     const [err, setError] = useState<string | null>(null)
     const [validationViolations, setValidationViolations] = useState<string[]>([])
     const [selectedParticipantsIDs, setSelectedParticipantsIDs] = useState<string[]>([])
+    const [isLoading, setIsLoading] = useState(false)
 
     const onOpenChange = useCallback((open: boolean) => {
         setIsOpen(open)
@@ -39,17 +40,18 @@ const CreateMeetingDialog = () => {
             setSelectedParticipantsIDs([])
             setError(null)
             setValidationViolations([])
+            setIsLoading(false)
         }
     }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        setIsLoading(true)
         const formData = new FormData(e.currentTarget as HTMLFormElement)
         const title = formData.get("title") as string
         const description = formData.get("description") as string
         const startDate = formData.get("startDate") as string
         const startTimeInput = formData.get("startTime") as string
-        
 
         let startTime: Date
         const [year, month, day] = startDate.split("-").map(Number)
@@ -65,7 +67,7 @@ const CreateMeetingDialog = () => {
             participantsIDs: selectedParticipantsIDs,
             type: type
         })
-        
+
         if (error) {
             const violations: string[] = []
             for (const violation of error.extra) {
@@ -81,6 +83,7 @@ const CreateMeetingDialog = () => {
                 setValidationViolations(violations)
             }
             setError(error.details)
+            setIsLoading(false)
             return
         }
 
@@ -88,13 +91,14 @@ const CreateMeetingDialog = () => {
             toast.success("Meeting created successfully!")
             setIsOpen(false)
             setSelectedParticipantsIDs([])
+            setIsLoading(false)
         }
     }
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogTrigger asChild>
-                <Button className="whitespace-nowrap">
+                <Button className="whitespace-nowrap" disabled={isLoading}>
                     <Plus className="mr-2 h-4 w-4" />
                     Create Meeting
                 </Button>
@@ -125,7 +129,7 @@ const CreateMeetingDialog = () => {
                                         <Label htmlFor="title" className="text-sm font-medium">
                                             Meeting Title *
                                         </Label>
-                                        <Input id="title" name="title" placeholder="Enter a descriptive meeting title" className="h-11" required />
+                                        <Input id="title" name="title" placeholder="Enter a descriptive meeting title" className="h-11" required disabled={isLoading} />
                                     </div>
 
                                     <div className="space-y-2">
@@ -137,6 +141,7 @@ const CreateMeetingDialog = () => {
                                             placeholder="Add meeting agenda, objectives, or any relevant details..."
                                             className="min-h-[80px] resize-none"
                                             name="description"
+                                            disabled={isLoading}
                                         />
                                     </div>
                                 </div>
@@ -155,6 +160,7 @@ const CreateMeetingDialog = () => {
 
                                 <div className="flex flex-col gap-4">
                                     <TimePicker 
+                                        disabled={isLoading}
                                         dateName="startDate" 
                                         timeName="startTime"
                                         dateRequired={true}
@@ -165,7 +171,7 @@ const CreateMeetingDialog = () => {
                                             <MapPin className="w-3 h-3" />
                                             Meeting Type *
                                         </Label>
-                                        <Select defaultValue="video">
+                                        <Select defaultValue="video" disabled={isLoading}>
                                             <SelectTrigger className="h-11">
                                                 <SelectValue placeholder="Select meeting type" />
                                             </SelectTrigger>
@@ -196,6 +202,7 @@ const CreateMeetingDialog = () => {
                             const selectedParticipantsIDs = users.map((user) => user.id)
                             setSelectedParticipantsIDs(selectedParticipantsIDs)
                         }}
+                        disabled={isLoading}
                     />
 
                     {/* Error Card */}
@@ -204,12 +211,12 @@ const CreateMeetingDialog = () => {
                     <Separator />
 
                     <DialogFooter className="flex-col sm:flex-row gap-2">
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto" disabled={isLoading}>
                             Cancel
                         </Button>
-                        <Button type="submit" className="w-full sm:w-auto">
+                        <Button type="submit" className="w-full sm:w-auto" disabled={isLoading}>
                             <Video className="w-4 h-4 mr-2" />
-                            Create Meeting
+                            {isLoading ? "Creating..." : "Create Meeting"}
                         </Button>
                     </DialogFooter>
                 </form>
