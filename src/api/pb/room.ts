@@ -37,6 +37,14 @@ export interface GetRecordingResponse {
   urls: string[];
 }
 
+export interface GenerateJoinLinkRequest {
+  meetingId: string;
+}
+
+export interface GenerateJoinLinkResponse {
+  token: string;
+}
+
 function createBaseJoinRoomRequest(): JoinRoomRequest {
   return { meetingId: "" };
 }
@@ -419,6 +427,122 @@ export const GetRecordingResponse: MessageFns<GetRecordingResponse> = {
   },
 };
 
+function createBaseGenerateJoinLinkRequest(): GenerateJoinLinkRequest {
+  return { meetingId: "" };
+}
+
+export const GenerateJoinLinkRequest: MessageFns<GenerateJoinLinkRequest> = {
+  encode(message: GenerateJoinLinkRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.meetingId !== "") {
+      writer.uint32(10).string(message.meetingId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GenerateJoinLinkRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGenerateJoinLinkRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.meetingId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GenerateJoinLinkRequest {
+    return { meetingId: isSet(object.meetingId) ? globalThis.String(object.meetingId) : "" };
+  },
+
+  toJSON(message: GenerateJoinLinkRequest): unknown {
+    const obj: any = {};
+    if (message.meetingId !== "") {
+      obj.meetingId = message.meetingId;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GenerateJoinLinkRequest>): GenerateJoinLinkRequest {
+    return GenerateJoinLinkRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GenerateJoinLinkRequest>): GenerateJoinLinkRequest {
+    const message = createBaseGenerateJoinLinkRequest();
+    message.meetingId = object.meetingId ?? "";
+    return message;
+  },
+};
+
+function createBaseGenerateJoinLinkResponse(): GenerateJoinLinkResponse {
+  return { token: "" };
+}
+
+export const GenerateJoinLinkResponse: MessageFns<GenerateJoinLinkResponse> = {
+  encode(message: GenerateJoinLinkResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.token !== "") {
+      writer.uint32(10).string(message.token);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GenerateJoinLinkResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGenerateJoinLinkResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.token = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GenerateJoinLinkResponse {
+    return { token: isSet(object.token) ? globalThis.String(object.token) : "" };
+  },
+
+  toJSON(message: GenerateJoinLinkResponse): unknown {
+    const obj: any = {};
+    if (message.token !== "") {
+      obj.token = message.token;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<GenerateJoinLinkResponse>): GenerateJoinLinkResponse {
+    return GenerateJoinLinkResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GenerateJoinLinkResponse>): GenerateJoinLinkResponse {
+    const message = createBaseGenerateJoinLinkResponse();
+    message.token = object.token ?? "";
+    return message;
+  },
+};
+
 export type RoomServiceDefinition = typeof RoomServiceDefinition;
 export const RoomServiceDefinition = {
   name: "RoomService",
@@ -448,12 +572,20 @@ export const RoomServiceDefinition = {
       responseStream: false,
       options: {},
     },
-    /** rpc GetRoom(GetRoomRequest) returns (Room); */
     getRecording: {
       name: "GetRecording",
       requestType: GetRecordingRequest,
       requestStream: false,
       responseType: GetRecordingResponse,
+      responseStream: false,
+      options: {},
+    },
+    /** rpc GetRoom(GetRoomRequest) returns (Room); */
+    generateGuestJoinRoomToken: {
+      name: "GenerateGuestJoinRoomToken",
+      requestType: GenerateJoinLinkRequest,
+      requestStream: false,
+      responseType: GenerateJoinLinkResponse,
       responseStream: false,
       options: {},
     },
@@ -464,22 +596,30 @@ export interface RoomServiceImplementation<CallContextExt = {}> {
   joinRoom(request: JoinRoomRequest, context: CallContext & CallContextExt): Promise<DeepPartial<JoinRoomResponse>>;
   recordRoom(request: RecordRoomRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Empty>>;
   stopRecording(request: RecordRoomRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Empty>>;
-  /** rpc GetRoom(GetRoomRequest) returns (Room); */
   getRecording(
     request: GetRecordingRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<GetRecordingResponse>>;
+  /** rpc GetRoom(GetRoomRequest) returns (Room); */
+  generateGuestJoinRoomToken(
+    request: GenerateJoinLinkRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<GenerateJoinLinkResponse>>;
 }
 
 export interface RoomServiceClient<CallOptionsExt = {}> {
   joinRoom(request: DeepPartial<JoinRoomRequest>, options?: CallOptions & CallOptionsExt): Promise<JoinRoomResponse>;
   recordRoom(request: DeepPartial<RecordRoomRequest>, options?: CallOptions & CallOptionsExt): Promise<Empty>;
   stopRecording(request: DeepPartial<RecordRoomRequest>, options?: CallOptions & CallOptionsExt): Promise<Empty>;
-  /** rpc GetRoom(GetRoomRequest) returns (Room); */
   getRecording(
     request: DeepPartial<GetRecordingRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<GetRecordingResponse>;
+  /** rpc GetRoom(GetRoomRequest) returns (Room); */
+  generateGuestJoinRoomToken(
+    request: DeepPartial<GenerateJoinLinkRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<GenerateJoinLinkResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

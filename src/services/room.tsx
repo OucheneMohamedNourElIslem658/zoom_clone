@@ -31,8 +31,6 @@ export const joinRoom = async (meetingID: string) : Promise<[ string | null, Ric
 }
 
 export const recordRoom = async (meetingID: string): Promise<RichClientError | Error | null> => {
-    console.log("Recording room with ID:", meetingID);
-    
     const accessToken = await getAccessToken();
     if (!accessToken) {
         return  new Error("Access token is not available. Please log in.");
@@ -48,8 +46,6 @@ export const recordRoom = async (meetingID: string): Promise<RichClientError | E
         await client.recordRoom({ meetingId: meetingID }, {
             metadata: metadata,
         });
-        console.log("Room recording started successfully.");
-        
         return null;
     } catch (error: any) {
         return error as RichClientError;
@@ -57,8 +53,6 @@ export const recordRoom = async (meetingID: string): Promise<RichClientError | E
 };
 
 export const stopRecordingRoom = async (meetingID: string): Promise<RichClientError | Error | null> => {
-    console.log("Stopping recording for room with ID:", meetingID);
-
     const accessToken = await getAccessToken();
     if (!accessToken) {
         return new Error("Access token is not available. Please log in.");
@@ -74,8 +68,6 @@ export const stopRecordingRoom = async (meetingID: string): Promise<RichClientEr
         await client.stopRecording({ meetingId: meetingID }, {
             metadata: metadata,
         });
-        console.log("Room recording stopped successfully.");
-
         return null;
     } catch (error: any) {
         return error as RichClientError;
@@ -102,5 +94,31 @@ export const getRecodrings = async (meetingID: string): Promise<[GetRecordingRes
         return [response, null];
     } catch (error: any) {
         return [null, error as RichClientError];
+    }
+}
+
+export const generateGuestRoomJoinToken = async (meetingID: string): Promise<[string | null, Error | null]> => {
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+        return [null, new Error("Access token is not available. Please log in.")];
+    }
+
+    let metadata: any = undefined;
+    if (accessToken) {
+        metadata = new Metadata();
+        metadata.set("Authorization", `Bearer ${accessToken}`);
+    }
+
+    try {
+        const response = await client.generateGuestJoinRoomToken({ meetingId: meetingID }, {
+            metadata: metadata,
+        });
+        if (response.token) {
+            return [response.token, null];
+        } else {
+            return [null, new Error("Failed to generate guest room join token.")];
+        }
+    } catch (error: any) {
+        return [null, error as Error];
     }
 }

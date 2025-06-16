@@ -53,8 +53,6 @@ export default function RecordingsPage() {
       if (err || !response) {
         setError(err)
       } else {
-        console.log(response);
-        
         setRecordings(response.urls)
         setRoomInfo({
           roomName: response.meetingName,

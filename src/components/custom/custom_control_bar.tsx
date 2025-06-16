@@ -39,7 +39,9 @@ export function CustomControlBar({
     leave: true,
   }
 
-  const meetingID = useRoomContext().name;
+  const room = useRoomContext();
+  const meetingID = room.name;
+  const isGuest = room.localParticipant.name?.toLowerCase() == "guest";
 
   const [_, setIsChatOpen] = useState(false);
   const layoutContext = useMaybeLayoutContext();
@@ -187,7 +189,7 @@ export function CustomControlBar({
           {showText && (isScreenShareEnabled ? 'Stop screen share' : 'Share screen')}
         </CustomTrackToggle>
       )}
-      <RecordingSwitcher onToggle={async (isRecording) => await handleRecordingToggle(isRecording)}/>
+      {!isGuest && (<RecordingSwitcher onToggle={async (isRecording) => await handleRecordingToggle(isRecording)}/>)}
       {visibleControls.chat && (
         <ChatToggle className="h-full">
           {showIcon && <ChatIcon />}

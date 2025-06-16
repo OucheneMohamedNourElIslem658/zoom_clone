@@ -9,6 +9,7 @@ service RoomService {
     rpc RecordRoom(RecordRoomRequest) returns (google.protobuf.Empty);
     rpc StopRecording(RecordRoomRequest) returns (google.protobuf.Empty);
     rpc GetRecording(GetRecordingRequest) returns (GetRecordingResponse);
+    rpc GenerateGuestJoinRoomToken(GenerateJoinLinkRequest) returns (GenerateJoinLinkResponse);
     // rpc GetRoom(GetRoomRequest) returns (Room);
 }
 
@@ -36,4 +37,13 @@ message GetRecordingResponse {
     string meetingName = 1;
     string meetingDescription = 2;
     repeated string urls = 3;
+}
+
+
+message GenerateJoinLinkRequest {
+    string meeting_id = 1;
+}
+
+message GenerateJoinLinkResponse {
+    string token = 1;
 }

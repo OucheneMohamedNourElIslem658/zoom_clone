@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import InfiniteScroll from '@/components/ui/infinite-scroll';
-import { Badge, CalendarDays, Clock, Loader2, Video } from 'lucide-react';
+import { CalendarDays, Clock, Loader2, Video } from 'lucide-react';
 import { Meeting, SearchMeetingsRequest_MeetingCategory } from '@/api/pb/schedule';
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { Button } from '../ui/button';
@@ -9,8 +9,9 @@ import { getMeetings, updateMeeting } from '@/services/schedule'
 import UpdateMeetingDialog from './update_meeting_dialog';
 import { ActionConfiramationDialog } from './action_confirmation_dialog';
 import { Link } from 'react-router-dom';
-import { getRecodrings } from '@/services/room';
-import { toast, Toaster } from 'sonner';
+import { Toaster } from 'sonner';
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import ShareMeetJoinLinkButton from './share_meet_join_link_dialog';
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString("en-US", {
@@ -31,103 +32,107 @@ function formatDate(date: Date) {
 
 function MeetingCard({ meeting, onUpdate } : { meeting : Meeting, onUpdate: () => void }) {
   const isPast = meeting.startTime!.getTime() < new Date().getTime();
-  const isNow =
-    new Date().getTime() === meeting.startTime!.getTime()
 
   const authorizedToEdit = meeting.currentuserId == meeting.host?.id && !meeting.isCancelled;
-  
 
   return (
-    <div className="border rounded-lg p-4 bg-card">
-      <div className="flex flex-col md:flex-row justify-between gap-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <h3 className={`font-medium text-lg ${meeting.isCancelled ? "line-through text-destructive" : ""}`}>{meeting.title}</h3>
-            {isNow && <Badge className="bg-green-500">Now</Badge>}
-          </div>
-            <p className="text-muted-foreground">{meeting.description}</p>
-          <div className="flex items-center text-muted-foreground gap-4">
-            <div className="flex items-center gap-1">
-              <CalendarDays className="h-4 w-4" />
-              <span>{formatDate(meeting.startTime!)}</span>
+    <Card className="bg-card">
+      <CardHeader>
+        <CardTitle className="text-lg font-semibold">
+          {meeting.title}
+        </CardTitle>
+        <CardDescription className="text-muted-foreground">
+          {meeting.description}
+        </CardDescription>
+        <CardAction>
+          {authorizedToEdit && !isPast && (<ShareMeetJoinLinkButton meetingId={meeting.id.toString()}/>)}
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center text-muted-foreground gap-4">
+              <div className="flex items-center gap-1">
+                <CalendarDays className="h-4 w-4" />
+                <span>{formatDate(meeting.startTime!)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                <span>
+                  {formatTime(meeting.startTime!)}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              <span>
-                {formatTime(meeting.startTime!)}
+            <div className="flex items-center gap-2">
+              <div className="flex -space-x-2">
+                {meeting.firstThreeParticipants.map((participant, i) => (
+                  <Avatar key={i} className="rounded-full overflow-hidden border-2 border-background h-8 w-8">
+                    <AvatarImage
+                      className="object-cover w-full h-full"
+                      src={participant.avatarUrl || "/placeholder.svg"}
+                      alt={participant.name}
+                    />
+                    <AvatarFallback className="rounded-full w-full h-full flex items-center justify-center bg-card">
+                      {(participant.name.charAt(0) || participant.email.charAt(0)).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+                {meeting.participantsCount - 1 > meeting.firstThreeParticipants.length && (
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-xs font-medium">
+                    +{meeting.participantsCount - meeting.firstThreeParticipants.length - 1}
+                  </div>
+                )}
+              </div>
+              <span className="text-sm text-muted-foreground">
+                Hosted by <span className="font-medium">{meeting.host!.name}</span>
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex -space-x-2">
-              {meeting.firstThreeParticipants.map((participant, i) => (
-                <Avatar key={i} className="rounded-full overflow-hidden border-2 border-background h-8 w-8">
-                  <AvatarImage
-                    className="object-cover w-full h-full"
-                    src={participant.avatarUrl || "/placeholder.svg"}
-                    alt={participant.name}
-                  />
-                  <AvatarFallback className="rounded-full w-full h-full flex items-center justify-center bg-card">
-                    {(participant.name.charAt(0) || participant.email.charAt(0)).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {meeting.participantsCount -1 > meeting.firstThreeParticipants.length && (
-                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-xs font-medium">
-                  +{meeting.participantsCount - meeting.firstThreeParticipants.length - 1}
-                </div>
-              )}
-            </div>
-            <span className="text-sm text-muted-foreground">
-              Hosted by <span className="font-medium">{meeting.host!.name}</span>
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 self-end md:self-center">
-          {isPast ? (
-            <>
+          <CardFooter className="flex items-center gap-2 self-end md:self-center p-0">
+            {isPast ? (
               <Link to={`/meetings/${meeting.id}/recordings`}>
-                <Button variant="outline" size="sm">
+                <Button size="sm">
                   View Recording
                 </Button>
               </Link>
-              <Button variant="outline" size="sm">
-                Meeting Notes
-              </Button>
-            </>
-          ) : 
-            <>
-              { authorizedToEdit && (<UpdateMeetingDialog 
-                meetingID={meeting.id}
-                onUpdate={onUpdate}
-              />)}
+            ) : (
+              <>
+                {authorizedToEdit && (
+                  <UpdateMeetingDialog
+                    meetingID={meeting.id}
+                    onUpdate={onUpdate}
+                  />
+                )}
                 <Link to={`/meetings/${meeting.id}/preparation`} target="_blank" rel="noopener noreferrer">
-                <Button size="sm" className="gap-1">
-                  <Video/>
-                  Join
-                </Button>
+                  <Button size="sm" className="gap-1">
+                    <Video />
+                    Join
+                  </Button>
                 </Link>
-              { authorizedToEdit && (<ActionConfiramationDialog
-                title='Cancel Meeting'
-                description='Are you sure you want to cancel this meeting? This action cannot be undone.'
-                onCancel={() => {}}
-                action={async () => {
-                  await updateMeeting({
-                    id: meeting.id,
-                    isCanceled: true,
-                  });
-                  onUpdate();
-                }}
-                trigger={
-                  <Button size="sm" className="gap-1" variant={"destructive"}>Cancel</Button>
-                }
-              />)}
-            </>
-          }
+                {authorizedToEdit && (
+                  <ActionConfiramationDialog
+                    title="Cancel Meeting"
+                    description="Are you sure you want to cancel this meeting? This action cannot be undone."
+                    onCancel={() => {}}
+                    action={async () => {
+                      await updateMeeting({
+                        id: meeting.id,
+                        isCanceled: true,
+                      });
+                      onUpdate();
+                    }}
+                    trigger={
+                      <Button size="sm" className="gap-1" variant={"destructive"}>Cancel</Button>
+                    }
+                  />
+                )}
+              </>
+            )}
+          </CardFooter>
         </div>
-      </div>
-    <Toaster/>
-    </div>
+        <Toaster />
+      </CardContent>
+    </Card>
   )
 }
 
