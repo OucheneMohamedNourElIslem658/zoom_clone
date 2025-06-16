@@ -27,8 +27,6 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
-
-	log.Println("Database connected succesfully!")
 }
 
 func MigrateTables() {
@@ -42,5 +40,5 @@ func MigrateTables() {
 		panic(err)
 	}
 
-	log.Println("Database tables migrated successfully!")
+	log.Println("Database tables migrated successfully")
 }

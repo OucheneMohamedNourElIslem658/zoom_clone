@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -242,7 +241,6 @@ func (r *RoomRepository) StopRecording(userID string, meetingID string) (error) 
 
 	// stop the last egress
 	egressID := participant.EgressIDs[len(participant.EgressIDs)-1]
-	log.Println(egressID)
 	req := &livekit.StopEgressRequest{
 		EgressId: egressID,
 	}
