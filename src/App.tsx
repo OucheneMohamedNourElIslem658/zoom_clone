@@ -8,9 +8,18 @@ import { AppBar } from "./components/custom/app_bar";
 import RecordingsPage from "./pages/recordings";
 import LandingPage from "./pages/landing";
 import NotFoundPage from "./pages/not_found";
+import { useEffect } from "react";
 
 
 function App() {
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", "dark");
+    localStorage.setItem("theme", "dark");
+    document.documentElement.classList.add("dark");
+    document.documentElement.classList.remove("light");
+    localStorage.setItem("theme", "dark");
+  }, []);
+
   return (
     <Router>
       <AppBar/>
