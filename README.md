@@ -1,6 +1,6 @@
 # Zoom Clone
 
-A Zoom-like video conferencing application built with **React**, **TypeScript**, and **Vite**, designed for seamless and efficient virtual collaboration.
+A Zoom-like video conferencing application built with **React**, **TypeScript**, and **Golang**, designed for seamless and efficient virtual collaboration.
 
 ## Features
 
