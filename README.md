@@ -30,7 +30,7 @@ Our application is built with a robust and entirely open-source tech stack:
 
 ## Preview
 
-[Zoom Clone Preview](https://drive.google.com/file/d/1QpqDB71BLFDp9R2P4LTai2ccnsrDzMex/view?usp=sharing)
+[Zoom Clone Preview](https://drive.google.com/file/d/1lchzt8sw7w4SVf5cuXQiWgsEU_Juvi6X/view?usp=sharing)
 
 ---
 
